@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -27,5 +27,9 @@ export class FieldService {
 
   deleteSlot(fieldId: number, slotId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/fields/${fieldId}/slots/${slotId}`);
+  }
+
+  updateField(fieldId: number, fieldData: any): Observable<any> {
+    return this.http.put(${this.apiUrl}/fields/${fieldId}, fieldData);
   }
 }

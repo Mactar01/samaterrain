@@ -241,6 +241,9 @@
                   <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Prix / heure</p>
                   <p class="text-xl font-bold text-slate-900">{{ field.price_per_hour }} <span class="text-sm font-medium text-gray-500">{{ field.currency }}</span></p>
                 </div>
+                <button (click)="editField(field)" class="mr-2 inline-flex items-center justify-center px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 shadow-sm hover:shadow transition-all">
+                  Éditer
+                </button>
                 <a [routerLink]="['/dashboard/fields', field.id, 'slots']" 
                    class="inline-flex items-center justify-center px-5 py-2.5 border border-transparent rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-sm hover:shadow transition-all">
                   Gérer les créneaux
@@ -343,4 +346,5 @@
     </main>
   </div>
 </div>
+
 

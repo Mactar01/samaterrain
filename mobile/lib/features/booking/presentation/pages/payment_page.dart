@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/booking_cubit.dart';
@@ -57,7 +57,7 @@ class _PaymentPageState extends State<PaymentPage> {
   void _submit(BuildContext context) {
     if (_phoneController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez entrer votre numéro de téléphone.'), backgroundColor: Colors.orange),
+        const SnackBar(content: Text('Veuillez entrer votre numÃ©ro de tÃ©lÃ©phone.'), backgroundColor: Colors.orange),
       );
       return;
     }
@@ -81,7 +81,7 @@ class _PaymentPageState extends State<PaymentPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text('Paiement de la réservation'),
+        title: const Text('Paiement de la rÃ©servation'),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -92,12 +92,15 @@ class _PaymentPageState extends State<PaymentPage> {
             context.go('/my_reservations');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('✅ Réservation confirmée ! À bientôt sur le terrain.'),
+                content: Text('âœ… RÃ©servation confirmÃ©e ! Ã€ bientÃ´t sur le terrain.'),
                 backgroundColor: Colors.green,
                 duration: Duration(seconds: 4),
               ),
             );
-          } else if (state is PaymentFailure) {
+          } else if (state is PaymentRedirect) {
+              // _launchUrl(state.url);
+              context.go('/my_reservations');
+            } else if (state is PaymentFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.red),
             );
@@ -112,7 +115,7 @@ class _PaymentPageState extends State<PaymentPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
 
-                // ── Récapitulatif réservation ──────────────────────────
+                // â”€â”€ RÃ©capitulatif rÃ©servation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -133,7 +136,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${widget.reservation['timeSlot']?['date'] ?? ''} • ${widget.reservation['timeSlot']?['start_time']?.toString().substring(0,5) ?? ''} - ${widget.reservation['timeSlot']?['end_time']?.toString().substring(0,5) ?? ''}',
+                        '${widget.reservation['timeSlot']?['date'] ?? ''} â€¢ ${widget.reservation['timeSlot']?['start_time']?.toString().substring(0,5) ?? ''} - ${widget.reservation['timeSlot']?['end_time']?.toString().substring(0,5) ?? ''}',
                         style: const TextStyle(color: Colors.white70, fontSize: 14),
                       ),
                       const SizedBox(height: 16),
@@ -152,7 +155,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // ── Choisir le montant ─────────────────────────────────
+                // â”€â”€ Choisir le montant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 _sectionCard(
                   title: 'Combien voulez-vous payer maintenant ?',
                   icon: Icons.account_balance_wallet_outlined,
@@ -160,20 +163,20 @@ class _PaymentPageState extends State<PaymentPage> {
                     children: [
                       _paymentOptionTile(
                         index: 0,
-                        title: 'Acompte (50%) — Obligatoire minimum',
-                        subtitle: '${minAmount.toStringAsFixed(0)} FCFA maintenant · ${minAmount.toStringAsFixed(0)} FCFA sur place',
+                        title: 'Acompte (50%) â€” Obligatoire minimum',
+                        subtitle: '${minAmount.toStringAsFixed(0)} FCFA maintenant Â· ${minAmount.toStringAsFixed(0)} FCFA sur place',
                         isRecommended: true,
                       ),
                       const SizedBox(height: 8),
                       _paymentOptionTile(
                         index: 2,
-                        title: 'Paiement intégral (100%)',
-                        subtitle: '${totalPrice.toStringAsFixed(0)} FCFA · Rien à payer sur place',
+                        title: 'Paiement intÃ©gral (100%)',
+                        subtitle: '${totalPrice.toStringAsFixed(0)} FCFA Â· Rien Ã  payer sur place',
                       ),
                       const SizedBox(height: 8),
                       _paymentOptionTile(
                         index: 1,
-                        title: 'Montant personnalisé',
+                        title: 'Montant personnalisÃ©',
                         subtitle: 'Entre ${minAmount.toStringAsFixed(0)} et ${totalPrice.toStringAsFixed(0)} FCFA',
                       ),
                       if (_paymentOption == 1) ...[
@@ -183,7 +186,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           keyboardType: TextInputType.number,
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
-                            labelText: 'Montant à payer (min. ${minAmount.toStringAsFixed(0)} FCFA)',
+                            labelText: 'Montant Ã  payer (min. ${minAmount.toStringAsFixed(0)} FCFA)',
                             suffixText: 'FCFA',
                             filled: true,
                             fillColor: Colors.grey.shade50,
@@ -198,7 +201,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
                 const SizedBox(height: 16),
 
-                // ── Montant à payer maintenant ─────────────────────────
+                // â”€â”€ Montant Ã  payer maintenant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
@@ -220,7 +223,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
                 const SizedBox(height: 16),
 
-                // ── Moyen de paiement ──────────────────────────────────
+                // â”€â”€ Moyen de paiement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 _sectionCard(
                   title: 'Moyen de paiement',
                   icon: Icons.payment_outlined,
@@ -228,17 +231,17 @@ class _PaymentPageState extends State<PaymentPage> {
                     children: [
                       Row(
                         children: [
-                          _methodCard('wave', 'Wave', '🌊', Colors.blue),
+                          _methodCard('wave', 'Wave', 'ðŸŒŠ', Colors.blue),
                           const SizedBox(width: 10),
-                          _methodCard('orange_money', 'Orange Money', '🟠', Colors.orange),
+                          _methodCard('orange_money', 'Orange Money', 'ðŸŸ ', Colors.orange),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          _methodCard('free_money', 'Free Money', '💚', Colors.green),
+                          _methodCard('free_money', 'Free Money', 'ðŸ’š', Colors.green),
                           const SizedBox(width: 10),
-                          _methodCard('cash', 'Espèces', '💵', Colors.grey),
+                          _methodCard('cash', 'EspÃ¨ces', 'ðŸ’µ', Colors.grey),
                         ],
                       ),
                     ],
@@ -247,10 +250,10 @@ class _PaymentPageState extends State<PaymentPage> {
 
                 const SizedBox(height: 16),
 
-                // ── Numéro de téléphone ────────────────────────────────
+                // â”€â”€ NumÃ©ro de tÃ©lÃ©phone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 if (_selectedMethod != 'cash')
                   _sectionCard(
-                    title: 'Numéro de téléphone',
+                    title: 'NumÃ©ro de tÃ©lÃ©phone',
                     icon: Icons.phone_outlined,
                     child: TextField(
                       controller: _phoneController,
@@ -262,7 +265,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         fillColor: Colors.grey.shade50,
                         prefixIcon: Padding(
                           padding: const EdgeInsets.all(12),
-                          child: Text('🇸🇳 +221 ', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                          child: Text('ðŸ‡¸ðŸ‡³ +221 ', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
                         ),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -271,7 +274,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
                 const SizedBox(height: 24),
 
-                // ── Bouton payer ───────────────────────────────────────
+                // â”€â”€ Bouton payer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
@@ -311,7 +314,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   children: [
                     Icon(Icons.security, size: 14, color: Colors.grey),
                     SizedBox(width: 4),
-                    Text('Paiement sécurisé — Annulable avant confirmation', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                    Text('Paiement sÃ©curisÃ© â€” Annulable avant confirmation', style: TextStyle(fontSize: 11, color: Colors.grey)),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -389,7 +392,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(color: Colors.orange.shade100, borderRadius: BorderRadius.circular(6)),
-                        child: Text('Recommandé', style: TextStyle(fontSize: 9, color: Colors.orange.shade800, fontWeight: FontWeight.bold)),
+                        child: Text('RecommandÃ©', style: TextStyle(fontSize: 9, color: Colors.orange.shade800, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ]),
@@ -431,6 +434,8 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 }
+
+
 
 
 

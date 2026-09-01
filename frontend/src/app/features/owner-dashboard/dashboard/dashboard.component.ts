@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { AdminService } from '../../../core/services/admin.service';
 
 import { ConfirmationService } from '../../../core/services/confirmation.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-dashboard',
@@ -77,14 +78,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.adminService.createOwner(this.newOwner).subscribe({
       next: (res) => {
         this.ownerCreating = false;
-        this.confirmationService.toast("Loueur créé avec succès !", "success");
+        this.confirmationService.toast("Loueur crÃ©Ã© avec succÃ¨s !", "success");
         this.newOwner = { name: '', email: '', password: '', password_confirmation: '', phone: '', business_name: '' };
         this.loadOwnersList();
         this.loadAdminData(); // Refresh stats
       },
       error: (err) => {
         this.ownerCreating = false;
-        this.confirmationService.error(err.error?.message || "Erreur lors de la création. Vérifiez les informations.");
+        this.confirmationService.error(err.error?.message || "Erreur lors de la crÃ©ation. VÃ©rifiez les informations.");
       }
     });
   }
@@ -108,16 +109,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.adminService.updateOwner(this.editingOwner.id, this.editForm).subscribe({
       next: () => {
         this.editingOwner = null;
-        this.confirmationService.toast("Partenaire mis à jour", "success");
+        this.confirmationService.toast("Partenaire mis Ã  jour", "success");
         this.loadOwnersList();
       },
-      error: (err) => this.confirmationService.error("Erreur lors de la mise à jour.")
+      error: (err) => this.confirmationService.error("Erreur lors de la mise Ã  jour.")
     });
   }
 
   toggleStatus(owner: any) {
     this.adminService.toggleOwnerStatus(owner.id).subscribe(() => {
-      this.confirmationService.toast("Statut mis à jour", "success");
+      this.confirmationService.toast("Statut mis Ã  jour", "success");
       this.loadOwnersList();
     });
   }
@@ -125,14 +126,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   async deleteOwner(owner: any) {
     const confirmed = await this.confirmationService.confirm({
       title: 'Supprimer ce partenaire ?',
-      text: `Êtes-vous sûr de vouloir supprimer définitivement le partenaire ${owner.business_name} ?`,
+      text: `ÃŠtes-vous sÃ»r de vouloir supprimer dÃ©finitivement le partenaire ${owner.business_name} ?`,
       confirmButtonText: 'Oui, supprimer',
       confirmButtonColor: '#ef4444' // red-500
     });
 
     if (confirmed) {
       this.adminService.deleteOwner(owner.id).subscribe(() => {
-        this.confirmationService.toast("Partenaire supprimé", "success");
+        this.confirmationService.toast("Partenaire supprimÃ©", "success");
         this.loadOwnersList();
         this.loadAdminData();
       });
@@ -149,7 +150,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (newUnreadCount > this.unreadCount && this.unreadCount !== 0) {
           const latestNotif = data.notifications?.data?.[0];
           if (latestNotif) {
-            this.confirmationService.toast("🔔 " + latestNotif.data.message, "info");
+            this.confirmationService.toast("ðŸ”” " + latestNotif.data.message, "info");
           }
         } else if (newUnreadCount > 0 && this.unreadCount === 0) {
             // Premier chargement s'il y a des notifs non lues
@@ -177,5 +178,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+  }
+
+  async editField(field: any) {
+    const { value: formValues } = await Swal.fire({
+      title: 'Modifier le terrain',
+      html: `
+        <div class="text-left">
+          <label class="block text-sm font-medium text-gray-700">Nom du terrain</label>
+          <input id="swal-input1" class="swal2-input !w-[90%] !mx-auto !block" value="${field.name}">
+          <label class="block text-sm font-medium text-gray-700 mt-3">Adresse exacte (ex: 45 rue X)</label>
+          <input id="swal-input2" class="swal2-input !w-[90%] !mx-auto !block" value="${field.address || ''}">
+          <label class="block text-sm font-medium text-gray-700 mt-3">Prix / heure (FCFA)</label>
+          <input id="swal-input3" type="number" class="swal2-input !w-[90%] !mx-auto !block" value="${field.price_per_hour}">
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Enregistrer',
+      cancelButtonText: 'Annuler',
+      confirmButtonColor: '#16a34a',
+      preConfirm: () => {
+        return {
+          name: (document.getElementById('swal-input1') as HTMLInputElement).value,
+          address: (document.getElementById('swal-input2') as HTMLInputElement).value,
+          price_per_hour: (document.getElementById('swal-input3') as HTMLInputElement).value
+        }
+      }
+    });
+
+    if (formValues) {
+      this.fieldService.updateField(field.id, formValues).subscribe({
+        next: () => {
+          this.confirmationService.toast("Terrain mis à jour !", "success");
+          this.loadOwnerData();
+        },
+        error: () => this.confirmationService.error("Erreur lors de la modification")
+      });
+    }
   }
 }

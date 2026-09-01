@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/booking_repository.dart';
 
 abstract class BookingState {}
@@ -23,6 +23,10 @@ class BookingFailure extends BookingState {
 }
 class PaymentLoading extends BookingState {}
 class PaymentSuccess extends BookingState {}
+class PaymentRedirect extends BookingState {
+  final String url;
+  PaymentRedirect(this.url);
+}
 class PaymentFailure extends BookingState {
   final String message;
   PaymentFailure(this.message);
@@ -48,7 +52,7 @@ class BookingCubit extends Cubit<BookingState> {
       currentSlots = slots;
       emit(SlotsLoaded(slots, date));
     } catch (e) {
-      emit(BookingFailure("Impossible de charger les créneaux."));
+      emit(BookingFailure("Impossible de charger les crÃ©neaux."));
     }
   }
 
@@ -59,14 +63,14 @@ class BookingCubit extends Cubit<BookingState> {
       if (reservation != null) {
         emit(BookingSuccess(reservation));
       } else {
-        emit(BookingFailure("Erreur serveur : réponse invalide."));
+        emit(BookingFailure("Erreur serveur : rÃ©ponse invalide."));
         if (currentDate != null) {
           emit(SlotsLoaded(currentSlots, currentDate!));
         }
       }
     } catch (e) {
       emit(BookingFailure(e.toString().replaceAll("Exception: ", "")));
-      // Re-emit les créneaux pour que l'UI se réaffiche
+      // Re-emit les crÃ©neaux pour que l'UI se rÃ©affiche
       if (currentDate != null) {
         emit(SlotsLoaded(currentSlots, currentDate!));
       }
@@ -80,7 +84,7 @@ class BookingCubit extends Cubit<BookingState> {
       if (success) {
         emit(PaymentSuccess());
       } else {
-        emit(PaymentFailure("Le paiement a échoué. Veuillez réessayer."));
+        emit(PaymentFailure("Le paiement a Ã©chouÃ©. Veuillez rÃ©essayer."));
       }
     } catch (e) {
       emit(PaymentFailure(e.toString().replaceAll("Exception: ", "")));
@@ -93,3 +97,4 @@ class BookingCubit extends Cubit<BookingState> {
     emit(ReservationsLoaded(res));
   }
 }
+

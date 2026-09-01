@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import '../../../core/network/dio_client.dart';
 
 class BookingRepository {
@@ -38,7 +38,7 @@ class BookingRepository {
     }
   }
 
-  Future<bool> payReservation(int reservationId, String method, String phone, String paymentType, {double? customAmount}) async {
+  Future<String?> payReservation(int reservationId, String method, String phone, String paymentType, {double? customAmount}) async {
     try {
       final data = {
         'method': method,
@@ -49,14 +49,18 @@ class BookingRepository {
         data['custom_amount'] = customAmount.toString();
       }
       final response = await dio.post('/reservations/$reservationId/pay', data: data);
-      return response.statusCode == 200;
+      
+      if (response.statusCode == 200 && response.data['payment_url'] != null) {
+        return response.data['payment_url'];
+      }
+      return null;
     } on DioException catch (e) {
       if (e.response?.data != null && e.response!.data['message'] != null) {
         throw Exception(e.response!.data['message']);
       }
-      return false;
+      return null;
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
@@ -64,7 +68,7 @@ class BookingRepository {
     try {
       final response = await dio.get('/reservations');
       if (response.statusCode == 200) {
-        return response.data['data'] as List<dynamic>; // Laravel paginate
+        return response.data['data'] as List<dynamic>;
       }
       return [];
     } catch (e) {

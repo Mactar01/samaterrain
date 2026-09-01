@@ -40,11 +40,15 @@ class NewReservationNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        // $this->reservation->load('user', 'timeSlot.field');
+        $this->reservation->loadMissing('user', 'timeSlot.field');
+        
+        $playerName = $this->reservation->user->name ?? 'Un joueur';
+        $time = $this->reservation->timeSlot->start_time ?? '';
+        $date = \Carbon\Carbon::parse($this->reservation->timeSlot->date)->format('d/m/Y');
         
         return [
             'reservation_id' => $this->reservation->id,
-            'message'        => 'Nouvelle réservation reçue !',
+            'message'        => "✅ $playerName a confirmé une réservation pour le $date à $time !",
             'amount'         => $this->reservation->total_price,
             'field_id'       => $this->reservation->timeSlot->field_id ?? null,
             'type'           => 'new_reservation'
