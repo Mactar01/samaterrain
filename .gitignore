@@ -1,4 +1,4 @@
-﻿# Global
+# Global
 node_modules/
 vendor/
 .env
@@ -27,7 +27,7 @@ frontend/.env
 # Mobile (Flutter)
 mobile/.dart_tool/
 mobile/.idea/
-mobile/build/
+# mobile/build/ (uncommented for vercel)
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/android/local.properties

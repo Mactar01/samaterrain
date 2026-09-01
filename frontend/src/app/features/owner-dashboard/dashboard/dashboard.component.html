@@ -216,7 +216,7 @@
           <div *ngFor="let field of fields" class="bg-white overflow-hidden shadow-sm border border-gray-100 rounded-2xl hover:shadow-2xl transition-all duration-300 group flex flex-col transform hover:-translate-y-1">
             <div class="h-40 bg-slate-800 relative overflow-hidden">
               <img class="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity duration-300 group-hover:scale-105" 
-                   [src]="field.primary_image ? ('http://192.168.1.4:8000/storage/' + field.primary_image) : 'https://images.unsplash.com/photo-1575361204481-4d3b6707ea20?q=80&w=1000&auto=format&fit=crop'" alt="Terrain">
+                   [src]="field.primary_image ? ('https://samaterrain-api.onrender.com/storage/' + field.primary_image) : 'https://images.unsplash.com/photo-1575361204481-4d3b6707ea20?q=80&w=1000&auto=format&fit=crop'" alt="Terrain">
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <div class="absolute top-4 right-4">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-green-700 shadow-sm">
