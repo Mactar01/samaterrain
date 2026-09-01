@@ -193,7 +193,7 @@
         </div>
 
         <!-- Terrains Grid -->
-        <div *ngIf="user?.role === 'owner'" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div *ngIf="user?.role === 'owner'" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           
           <!-- Empty State -->
           <div *ngIf="fields.length === 0" class="col-span-full">
@@ -228,7 +228,7 @@
               </div>
             </div>
             
-            <div class="p-6 flex-1 flex flex-col justify-between">
+            <div class="p-4 flex-1 flex flex-col justify-between">
               <div>
                 <div class="flex items-center text-sm text-gray-500 mb-4 bg-gray-50 p-2 rounded-lg inline-flex">
                   <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -238,17 +238,18 @@
               
               <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
                 <div>
-                  <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Prix / heure</p>
-                  <p class="text-xl font-bold text-slate-900">{{ field.price_per_hour }} <span class="text-sm font-medium text-gray-500">{{ field.currency }}</span></p>
+                  <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Prix / h</p>
+                  <p class="text-lg font-bold text-slate-900">{{ field.price_per_hour }} <span class="text-xs font-medium text-gray-500">{{ field.currency }}</span></p>
                 </div>
-                <button (click)="editField(field)" class="mr-2 inline-flex items-center justify-center px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 shadow-sm hover:shadow transition-all">
-                  Éditer
+                <div class="flex items-center">
+                  <button (click)="editField(field)" title="Modifier" class="mr-2 inline-flex items-center justify-center p-2 border border-slate-200 rounded-xl text-slate-600 bg-white hover:bg-slate-50 hover:text-green-600 shadow-sm hover:shadow transition-all">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                 </button>
-                <a [routerLink]="['/dashboard/fields', field.id, 'slots']" 
-                   class="inline-flex items-center justify-center px-5 py-2.5 border border-transparent rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-sm hover:shadow transition-all">
-                  Gérer les créneaux
-                  <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                <a [routerLink]="['/dashboard/fields', field.id, 'slots']" title="Gérer les créneaux"
+                   class="inline-flex items-center justify-center p-2 border border-transparent rounded-xl text-white bg-green-600 hover:bg-green-700 shadow-sm hover:shadow transition-all">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 </a>
+                </div>
               </div>
             </div>
           </div>
@@ -309,10 +310,17 @@
                         {{ owner.user?.is_active ? 'Actif' : 'Désactivé' }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                      <button (click)="startEdit(owner)" class="text-indigo-600 hover:text-indigo-900">Éditer</button>
-                      <button (click)="toggleStatus(owner)" class="text-orange-600 hover:text-orange-900">{{ owner.user?.is_active ? 'Désactiver' : 'Activer' }}</button>
-                      <button (click)="deleteOwner(owner)" class="text-red-600 hover:text-red-900">Supprimer</button>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+                      <button (click)="startEdit(owner)" title="Éditer" class="text-indigo-600 hover:text-indigo-900">
+                        <svg class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                      </button>
+                      <button (click)="toggleStatus(owner)" [title]="owner.user?.is_active ? 'Désactiver' : 'Activer'" class="text-orange-600 hover:text-orange-900">
+                        <svg *ngIf="owner.user?.is_active" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <svg *ngIf="!owner.user?.is_active" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </button>
+                      <button (click)="deleteOwner(owner)" title="Supprimer" class="text-red-600 hover:text-red-900">
+                        <svg class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
                     </td>
                   </tr>
                   
@@ -331,9 +339,13 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       -
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                      <button (click)="saveEdit()" class="text-green-600 hover:text-green-900">Enregistrer</button>
-                      <button (click)="cancelEdit()" class="text-slate-600 hover:text-slate-900">Annuler</button>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+                      <button (click)="saveEdit()" title="Enregistrer" class="text-green-600 hover:text-green-900">
+                        <svg class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                      </button>
+                      <button (click)="cancelEdit()" title="Annuler" class="text-slate-600 hover:text-slate-900">
+                        <svg class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
                     </td>
                   </tr>
                 </ng-container>
