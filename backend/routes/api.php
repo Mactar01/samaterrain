@@ -124,3 +124,9 @@ Route::prefix('v1')->group(function () {
     // Webhook paiement (non authentifié, signature vérifiée en interne)
     // Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
 });
+
+// TEMPORARY ROUTE FOR SEEDING
+Route::get('/run-seeder', function () {
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    return response()->json(['message' => 'Database seeded successfully!', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+});
