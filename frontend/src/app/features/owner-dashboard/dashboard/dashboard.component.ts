@@ -1,0 +1,181 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { FieldService } from '../../../core/services/field.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { AdminService } from '../../../core/services/admin.service';
+
+import { ConfirmationService } from '../../../core/services/confirmation.service';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
+  templateUrl: './dashboard.component.html'
+})
+export class DashboardComponent implements OnInit, OnDestroy {
+  fields: any[] = [];
+  user: any;
+  notifications: any[] = [];
+  unreadCount = 0;
+
+  newOwner = { name: '', email: '', password: '', password_confirmation: '', phone: '', business_name: '' };
+  ownerCreating = false;
+
+  // Admin Data
+  stats: any = null;
+  ownersList: any[] = [];
+  editingOwner: any = null;
+  editForm = { name: '', email: '', phone: '', business_name: '' };
+
+  constructor(
+    private fieldService: FieldService, 
+    private authService: AuthService,
+    private adminService: AdminService,
+    private http: HttpClient,
+    private confirmationService: ConfirmationService
+  ) {}
+
+  ngOnInit() {
+    this.authService.currentUser.subscribe(u => {
+      this.user = u;
+      if (this.user?.role === 'owner') {
+        this.loadOwnerData();
+      } else if (this.user?.role === 'admin') {
+        this.loadAdminData();
+      }
+    });
+
+    this.loadNotifications();
+    // Poll every 15 seconds
+    this.notifInterval = setInterval(() => {
+      this.loadNotifications();
+    }, 15000);
+  }
+
+  loadAdminData() {
+    this.adminService.getStats().subscribe(res => this.stats = res);
+    this.loadOwnersList();
+  }
+
+  loadOwnersList() {
+    this.adminService.getOwners().subscribe(res => this.ownersList = res);
+  }
+
+  loadOwnerData() {
+    this.fieldService.getOwnerFields().subscribe({
+      next: (data) => this.fields = data,
+      error: (err) => console.error(err)
+    });
+  }
+
+  createOwner() {
+    this.ownerCreating = true;
+
+    this.adminService.createOwner(this.newOwner).subscribe({
+      next: (res) => {
+        this.ownerCreating = false;
+        this.confirmationService.toast("Loueur créé avec succès !", "success");
+        this.newOwner = { name: '', email: '', password: '', password_confirmation: '', phone: '', business_name: '' };
+        this.loadOwnersList();
+        this.loadAdminData(); // Refresh stats
+      },
+      error: (err) => {
+        this.ownerCreating = false;
+        this.confirmationService.error(err.error?.message || "Erreur lors de la création. Vérifiez les informations.");
+      }
+    });
+  }
+
+  startEdit(owner: any) {
+    this.editingOwner = owner;
+    this.editForm = {
+      name: owner.user.name,
+      email: owner.user.email,
+      phone: owner.user.phone || '',
+      business_name: owner.business_name
+    };
+  }
+
+  cancelEdit() {
+    this.editingOwner = null;
+  }
+
+  saveEdit() {
+    if (!this.editingOwner) return;
+    this.adminService.updateOwner(this.editingOwner.id, this.editForm).subscribe({
+      next: () => {
+        this.editingOwner = null;
+        this.confirmationService.toast("Partenaire mis à jour", "success");
+        this.loadOwnersList();
+      },
+      error: (err) => this.confirmationService.error("Erreur lors de la mise à jour.")
+    });
+  }
+
+  toggleStatus(owner: any) {
+    this.adminService.toggleOwnerStatus(owner.id).subscribe(() => {
+      this.confirmationService.toast("Statut mis à jour", "success");
+      this.loadOwnersList();
+    });
+  }
+
+  async deleteOwner(owner: any) {
+    const confirmed = await this.confirmationService.confirm({
+      title: 'Supprimer ce partenaire ?',
+      text: `Êtes-vous sûr de vouloir supprimer définitivement le partenaire ${owner.business_name} ?`,
+      confirmButtonText: 'Oui, supprimer',
+      confirmButtonColor: '#ef4444' // red-500
+    });
+
+    if (confirmed) {
+      this.adminService.deleteOwner(owner.id).subscribe(() => {
+        this.confirmationService.toast("Partenaire supprimé", "success");
+        this.loadOwnersList();
+        this.loadAdminData();
+      });
+    }
+  }
+
+  private notifInterval: any;
+
+  loadNotifications() {
+    this.http.get<any>('http://192.168.1.4:8000/api/v1/notifications').subscribe({
+      next: (data) => {
+        const newUnreadCount = data.unread_count || 0;
+        // Si on a plus de notifications non lues qu'avant, on affiche un toast
+        if (newUnreadCount > this.unreadCount && this.unreadCount !== 0) {
+          const latestNotif = data.notifications?.data?.[0];
+          if (latestNotif) {
+            this.confirmationService.toast("🔔 " + latestNotif.data.message, "info");
+          }
+        } else if (newUnreadCount > 0 && this.unreadCount === 0) {
+            // Premier chargement s'il y a des notifs non lues
+            this.confirmationService.toast(`Vous avez ${newUnreadCount} notification(s) non lue(s)`, "info");
+        }
+        
+        this.notifications = data.notifications?.data || [];
+        this.unreadCount = newUnreadCount;
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.notifInterval) {
+      clearInterval(this.notifInterval);
+    }
+  }
+
+  markAsRead(id: string) {
+    this.http.patch(`http://192.168.1.4:8000/api/v1/notifications/${id}/read`, {}).subscribe({
+      next: () => this.loadNotifications()
+    });
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+}

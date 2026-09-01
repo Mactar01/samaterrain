@@ -1,0 +1,65 @@
+# Séquence : Réservation d'un terrain
+# Format : PlantUML — https://www.plantuml.com/plantuml
+
+@startuml myTerrain_reservation_sequence
+
+title myTerrain — Séquence de Réservation (Anti-Double Réservation)
+
+actor "Joueur" as P
+participant "App Flutter\n/ Angular" as APP
+participant "API Laravel" as API
+database "MySQL" as DB
+participant "Prestataire\nPaiement" as PAY
+participant "Firebase\nFCM" as FCM
+
+autonumber
+
+P -> APP : Sélectionne terrain + créneau
+APP -> API : GET /fields/{id}/availability?date=...
+API -> DB : SELECT time_slots WHERE field_id=? AND date=?
+DB --> API : Liste des créneaux
+API --> APP : Créneaux disponibles
+APP --> P : Affiche calendrier disponibilité
+
+P -> APP : Clique "Réserver ce créneau"
+APP -> API : POST /reservations\n{field_id, time_slot_id}
+
+API -> DB : BEGIN TRANSACTION
+
+API -> DB : SELECT * FROM time_slots\nWHERE id=? FOR UPDATE
+note right of DB : Verrou exclusif sur le créneau\npour éviter les doublons
+
+DB --> API : Créneau trouvé (status=available)
+
+API -> DB : SELECT * FROM reservations\nWHERE time_slot_id=? AND status='confirmed'
+DB --> API : Aucune réservation confirmée
+
+API -> DB : INSERT INTO reservations\n(status='pending', ...)
+API -> DB : UPDATE time_slots SET status='reserved'
+
+API -> DB : COMMIT
+DB --> API : OK
+
+API --> APP : HTTP 201\n{reservation_id, status: 'pending', payment_url}
+
+APP --> P : Affiche écran de paiement
+
+P -> APP : Choisit mode de paiement (Wave, OM...)
+APP -> PAY : Initie paiement (montant, référence)
+PAY --> APP : URL de paiement
+APP --> P : Redirige vers interface paiement
+P -> PAY : Effectue le paiement
+
+PAY -> API : Webhook POST /payments/webhook\n{status: 'success', reference: 'TXN_001'}
+
+API -> DB : BEGIN TRANSACTION
+API -> DB : UPDATE payments SET status='completed'
+API -> DB : UPDATE reservations SET status='confirmed'
+API -> DB : COMMIT
+
+API -> FCM : Envoi notification push\n"Réservation confirmée !"
+FCM --> P : Notification push reçue
+
+API --> P : Email de confirmation
+
+@enduml

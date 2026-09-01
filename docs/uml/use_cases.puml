@@ -1,0 +1,140 @@
+# myTerrain — Diagramme de Cas d'Utilisation
+# Format : PlantUML (copier sur https://www.plantuml.com/plantuml)
+
+@startuml myTerrain_use_cases
+
+title myTerrain — Diagramme de Cas d'Utilisation
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+' ============ ACTEURS ============
+actor "Joueur" as P #00BCD4
+actor "Loueur" as O #4CAF50
+actor "Administrateur" as A #FF5722
+actor "Système Paiement" as PS #9E9E9E
+actor "Firebase (FCM)" as FCM #FFC107
+
+' ============ JOUEUR ============
+rectangle "Application myTerrain" {
+
+  package "Authentification" {
+    usecase "S'inscrire" as UC1
+    usecase "Se connecter" as UC2
+    usecase "Récupérer son compte" as UC3
+  }
+
+  package "Recherche & Découverte" {
+    usecase "Rechercher un terrain" as UC4
+    usecase "Filtrer (prix, type, dispo)" as UC5
+    usecase "Voir carte interactive" as UC6
+    usecase "Consulter fiche terrain" as UC7
+    usecase "Lire les avis" as UC8
+    usecase "Voir disponibilités" as UC9
+  }
+
+  package "Réservation" {
+    usecase "Sélectionner un créneau" as UC10
+    usecase "Réserver un terrain" as UC11
+    usecase "Payer en ligne" as UC12
+    usecase "Recevoir confirmation" as UC13
+    usecase "Annuler une réservation" as UC14
+    usecase "Voir historique" as UC15
+  }
+
+  package "Communauté" {
+    usecase "Créer un match" as UC16
+    usecase "Rejoindre un match" as UC17
+    usecase "Géolocalisation" as UC18
+    usecase "Lancer itinéraire" as UC19
+    usecase "Gérer favoris" as UC20
+    usecase "Laisser un avis" as UC21
+  }
+
+  package "Profil" {
+    usecase "Gérer son profil" as UC22
+    usecase "Recevoir notifications" as UC23
+  }
+
+  ' ============ LOUEUR ============
+  package "Gestion Terrain (Loueur)" {
+    usecase "Créer un terrain" as UC24
+    usecase "Modifier un terrain" as UC25
+    usecase "Ajouter des photos" as UC26
+    usecase "Gérer les créneaux" as UC27
+    usecase "Valider une réservation" as UC28
+    usecase "Suivre les revenus" as UC29
+    usecase "Voir dashboard" as UC30
+  }
+
+  ' ============ ADMIN ============
+  package "Administration" {
+    usecase "Valider un loueur" as UC31
+    usecase "Gérer utilisateurs" as UC32
+    usecase "Superviser réservations" as UC33
+    usecase "Gérer commissions" as UC34
+    usecase "Voir statistiques" as UC35
+    usecase "Mettre terrain en avant" as UC36
+  }
+}
+
+' ============ RELATIONS JOUEUR ============
+P --> UC1
+P --> UC2
+P --> UC3
+P --> UC4
+P --> UC5
+P --> UC6
+P --> UC7
+P --> UC8
+P --> UC9
+P --> UC10
+P --> UC11
+P --> UC12
+P --> UC13
+P --> UC14
+P --> UC15
+P --> UC16
+P --> UC17
+P --> UC18
+P --> UC19
+P --> UC20
+P --> UC21
+P --> UC22
+P --> UC23
+
+UC4 ..> UC5 : <<extend>>
+UC4 ..> UC6 : <<extend>>
+UC11 ..> UC10 : <<include>>
+UC11 ..> UC12 : <<include>>
+UC12 ..> UC13 : <<include>>
+
+' ============ RELATIONS LOUEUR ============
+O --> UC2
+O --> UC24
+O --> UC25
+O --> UC26
+O --> UC27
+O --> UC28
+O --> UC29
+O --> UC30
+O --> UC23
+
+UC24 ..> UC26 : <<extend>>
+
+' ============ RELATIONS ADMIN ============
+A --> UC2
+A --> UC31
+A --> UC32
+A --> UC33
+A --> UC34
+A --> UC35
+A --> UC36
+
+' ============ SYSTÈMES EXTERNES ============
+UC12 --> PS : <<use>>
+UC13 --> FCM : <<use>>
+UC23 --> FCM : <<use>>
+
+@enduml

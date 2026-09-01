@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "myTerrain API",
+    "description": "Collection de tests pour l'API myTerrain — Phases 2, 3 et 4",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "field_id", "value": "" },
+    { "key": "slot_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentification",
+      "item": [
+        {
+          "name": "Login — Loueur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Token et user présents', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.token).to.be.a('string');",
+                  "  pm.collectionVariables.set('token', body.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"loueur@myterrain.com\",\n  \"password\": \"Loueur@1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Login — Joueur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Token présent', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('token', body.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mamadou@test.com\",\n  \"password\": \"Player@1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏟️ Terrains (Fields)",
+      "item": [
+        {
+          "name": "1. Créer un terrain (Loueur)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('ID du terrain stocké', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('field_id', body.field.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/fields",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Terrain synthétique Dakar\",\n  \"description\": \"Superbe terrain 5v5\",\n  \"address\": \"Sacré Coeur 3\",\n  \"city\": \"Dakar\",\n  \"latitude\": 14.716677,\n  \"longitude\": -17.467686,\n  \"type\": \"artificial_grass\",\n  \"capacity\": 10,\n  \"size\": \"40x20m\",\n  \"price_per_hour\": 15000\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "2. Liste des terrains (Public)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/fields?city=Dakar&type=artificial_grass",
+            "header": [{ "key": "Accept", "value": "application/json" }]
+          }
+        },
+        {
+          "name": "3. Mes terrains (Loueur)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/owner/fields",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Réservations & Créneaux",
+      "item": [
+        {
+          "name": "1. Créer un créneau (Loueur)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('ID du créneau stocké', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('slot_id', body.slot.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/fields/{{field_id}}/slots",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2024-12-31\",\n  \"start_time\": \"18:00\",\n  \"end_time\": \"19:00\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "2. Lister les créneaux",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/fields/{{field_id}}/slots?date=2024-12-31",
+            "header": [{ "key": "Accept", "value": "application/json" }]
+          }
+        },
+        {
+          "name": "3. Réserver un créneau (Joueur)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/reservations",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time_slot_id\": {{slot_id}},\n  \"notes\": \"Match entre amis\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

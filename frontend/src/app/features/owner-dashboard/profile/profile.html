@@ -1,0 +1,81 @@
+<div class="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <div class="md:flex md:items-center md:justify-between mb-6">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+        Mon Profil
+      </h2>
+    </div>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Alerts -->
+        <!-- Informations Personnelles -->
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Informations personnelles</h3>
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div class="sm:col-span-6">
+            <label for="email" class="block text-sm font-medium text-gray-700">Adresse email (Lecture seule)</label>
+            <div class="mt-1">
+              <input type="text" [value]="user?.email" disabled class="shadow-sm bg-gray-50 focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div class="sm:col-span-3">
+            <label for="name" class="block text-sm font-medium text-gray-700">Nom complet</label>
+            <div class="mt-1">
+              <input type="text" formControlName="name" id="name" class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div class="sm:col-span-3">
+            <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone</label>
+            <div class="mt-1">
+              <input type="text" formControlName="phone" id="phone" class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+        </div>
+
+        <div class="hidden sm:block" aria-hidden="true">
+          <div class="py-5">
+            <div class="border-t border-gray-200"></div>
+          </div>
+        </div>
+
+        <!-- Mot de passe -->
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 mt-6 sm:mt-0">Modifier le mot de passe</h3>
+        <p class="text-sm text-gray-500 mb-4">Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe.</p>
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div class="sm:col-span-6">
+            <label for="current_password" class="block text-sm font-medium text-gray-700">Mot de passe actuel</label>
+            <div class="mt-1">
+              <input type="password" formControlName="current_password" id="current_password" class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div class="sm:col-span-3">
+            <label for="new_password" class="block text-sm font-medium text-gray-700">Nouveau mot de passe</label>
+            <div class="mt-1">
+              <input type="password" formControlName="new_password" id="new_password" class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div class="sm:col-span-3">
+            <label for="new_password_confirmation" class="block text-sm font-medium text-gray-700">Confirmer le nouveau mot de passe</label>
+            <div class="mt-1">
+              <input type="password" formControlName="new_password_confirmation" id="new_password_confirmation" class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-8 pt-5 border-t border-gray-200 flex justify-end">
+          <button type="submit" [disabled]="profileForm.invalid || isLoading" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50">
+            <svg *ngIf="isLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Enregistrer les modifications
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

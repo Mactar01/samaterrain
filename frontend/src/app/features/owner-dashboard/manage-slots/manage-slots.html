@@ -1,0 +1,258 @@
+﻿<div class="min-h-screen bg-gray-50">
+
+  <!-- Header sticky -->
+  <div class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()"
+          class="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">Gestion des créneaux</h1>
+          <p class="text-sm text-gray-500">Planifiez les horaires de votre terrain</p>
+        </div>
+      </div>
+      <button (click)="openBulkModal()"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 shadow-sm transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Génération automatique
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Sélecteur de semaine avec onglets de jours -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <button (click)="prevWeek()"
+          class="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="font-semibold text-gray-700 text-sm">Semaine du {{ weekDays[0]?.label }}</span>
+        <button (click)="nextWeek()"
+          class="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-7 gap-1">
+        <button *ngFor="let day of weekDays" (click)="selectDay(day.date)"
+          class="flex flex-col items-center py-2 px-1 rounded-xl transition-all text-xs font-medium"
+          [ngClass]="selectedDate === day.date ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'">
+          <span class="uppercase tracking-wide text-[10px]">{{ day.shortName }}</span>
+          <span class="text-base font-bold mt-0.5">{{ day.dayNum }}</span>
+          <span *ngIf="slotsByDate[day.date]?.length" class="mt-1 h-1.5 w-1.5 rounded-full"
+            [ngClass]="selectedDate === day.date ? 'bg-green-200' : 'bg-green-500'">
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats du jour -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
+        <p class="text-2xl font-bold text-gray-900">{{ slots.length }}</p>
+        <p class="text-xs text-gray-500 mt-1">Total créneaux</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-green-100 p-4 text-center">
+        <p class="text-2xl font-bold text-green-600">{{ availableCount }}</p>
+        <p class="text-xs text-gray-500 mt-1">Disponibles</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-red-100 p-4 text-center">
+        <p class="text-2xl font-bold text-red-500">{{ reservedCount }}</p>
+        <p class="text-xs text-gray-500 mt-1">Réservés</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Formulaire ajout rapide -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
+          <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2">
+            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-green-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </span>
+            Ajouter un créneau
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input type="date" [(ngModel)]="selectedDate" (change)="loadSlots()"
+                class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Heure de début</label>
+              <input type="time" [(ngModel)]="newSlot.start_time"
+                class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Heure de fin</label>
+              <input type="time" [(ngModel)]="newSlot.end_time"
+                class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none">
+            </div>
+            <button (click)="addSlot()" [disabled]="isAdding"
+              class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              <svg *ngIf="isAdding" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              {{ isAdding ? 'Ajout...' : 'Créer le créneau' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grille des créneaux -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-bold text-gray-900">Planning du {{ formatDisplayDate(selectedDate) }}</h3>
+            <button *ngIf="availableCount > 0" (click)="deleteAllAvailable()"
+              class="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Tout effacer
+            </button>
+          </div>
+
+          <div *ngIf="isLoading" class="py-16 flex items-center justify-center">
+            <svg class="animate-spin h-8 w-8 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          </div>
+
+          <div *ngIf="slots.length === 0 && !isLoading" class="py-16 text-center">
+            <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p class="text-gray-500 font-medium">Aucun créneau pour ce jour</p>
+            <p class="text-gray-400 text-sm mt-1">Ajoutez manuellement ou utilisez la génération automatique</p>
+            <button (click)="openBulkModal()" class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-all">
+              ⚡ Générer automatiquement
+            </button>
+          </div>
+
+          <div *ngIf="slots.length > 0 && !isLoading" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div *ngFor="let slot of slots"
+              class="relative group rounded-xl border-2 p-3 transition-all"
+              [ngClass]="{
+                'border-green-200 bg-green-50 hover:border-green-400': slot.status === 'available',
+                'border-red-200 bg-red-50': slot.status === 'reserved',
+                'border-yellow-200 bg-yellow-50': slot.status === 'pending'
+              }">
+
+              <span class="absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                [ngClass]="{
+                  'bg-green-100 text-green-700': slot.status === 'available',
+                  'bg-red-100 text-red-700': slot.status === 'reserved',
+                  'bg-yellow-100 text-yellow-700': slot.status === 'pending'
+                }">
+                {{ slot.status === 'available' ? 'Libre' : slot.status === 'reserved' ? 'Réservé' : 'En attente' }}
+              </span>
+
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-bold text-gray-800 text-sm">{{ slot.start_time.substring(0,5) }}</span>
+              </div>
+              <span class="text-xs text-gray-400 block ml-5">→ {{ slot.end_time.substring(0,5) }}</span>
+
+              <button *ngIf="slot.status === 'available'" (click)="deleteSlot(slot.id)"
+                class="mt-2 w-full text-xs text-red-500 font-medium py-1 rounded-lg hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100">
+                Supprimer
+              </button>
+              <p *ngIf="slot.status !== 'available'" class="mt-2 text-[10px] text-gray-400 text-center">Non modifiable</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Génération Automatique -->
+<div *ngIf="showBulkModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" (click)="showBulkModal = false"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">⚡ Génération automatique</h3>
+          <p class="text-sm text-gray-500 mt-0.5">Créez plusieurs créneaux en un clic</p>
+        </div>
+        <button (click)="showBulkModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
+            <input type="date" [(ngModel)]="bulk.startDate"
+              class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin</label>
+            <input type="date" [(ngModel)]="bulk.endDate"
+              class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Heure d'ouverture</label>
+            <input type="time" [(ngModel)]="bulk.openTime"
+              class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Heure de fermeture</label>
+            <input type="time" [(ngModel)]="bulk.closeTime"
+              class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Durée par créneau</label>
+          <select [(ngModel)]="bulk.durationMinutes"
+            class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-green-500 outline-none bg-white">
+            <option [value]="30">30 minutes</option>
+            <option [value]="60">1 heure</option>
+            <option [value]="90">1h30</option>
+            <option [value]="120">2 heures</option>
+          </select>
+        </div>
+        <div class="bg-green-50 border border-green-100 rounded-xl p-3 flex items-center justify-between">
+          <span class="text-sm text-green-700 font-medium">Créneaux à créer (estimé)</span>
+          <span class="text-xl font-bold text-green-800">{{ estimateSlots() }}</span>
+        </div>
+        <button (click)="generateBulk()" [disabled]="isBulkGenerating"
+          class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+          <svg *ngIf="isBulkGenerating" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ isBulkGenerating ? 'Génération en cours...' : '🚀 Générer les créneaux' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
