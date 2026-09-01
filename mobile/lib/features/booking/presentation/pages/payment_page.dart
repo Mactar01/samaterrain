@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/booking_cubit.dart';
 
@@ -98,7 +99,7 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             );
           } else if (state is PaymentRedirect) {
-              // _launchUrl(state.url);
+              launchUrl(Uri.parse(state.url), mode: LaunchMode.externalApplication);
               context.go('/my_reservations');
             } else if (state is PaymentFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -434,6 +435,7 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 }
+
 
 
 

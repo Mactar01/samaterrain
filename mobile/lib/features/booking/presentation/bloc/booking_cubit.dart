@@ -1,4 +1,4 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/booking_repository.dart';
 
 abstract class BookingState {}
@@ -80,11 +80,11 @@ class BookingCubit extends Cubit<BookingState> {
   Future<void> pay(int reservationId, String method, String phone, String paymentType, {double? customAmount}) async {
     emit(PaymentLoading());
     try {
-      final success = await repository.payReservation(reservationId, method, phone, paymentType, customAmount: customAmount);
-      if (success) {
-        emit(PaymentSuccess());
+      final url = await repository.payReservation(reservationId, method, phone, paymentType, customAmount: customAmount);
+      if (url != null) {
+        emit(PaymentRedirect(url));
       } else {
-        emit(PaymentFailure("Le paiement a Ã©chouÃ©. Veuillez rÃ©essayer."));
+        emit(PaymentFailure("Le paiement a échoué. Veuillez réessayer."));
       }
     } catch (e) {
       emit(PaymentFailure(e.toString().replaceAll("Exception: ", "")));
