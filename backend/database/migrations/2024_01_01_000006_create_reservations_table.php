@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('reservations', function (Blueprint $table) {
+        Schema::create('reservations', function (Blueprint ) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('field_id')->constrained('fields')->cascadeOnDelete();
@@ -27,18 +27,22 @@ return new class extends Migration
             $table->index('status');
         });
 
-        // ⚠️ CONTRAINTE ANTI-DOUBLE RÉSERVATION
-        // Colonne générée : NULL si status != 'confirmed', sinon "field_id_slot_id"
-        // L'index UNIQUE sur cette colonne garantit qu'un créneau ne peut avoir
-        // qu'une seule réservation confirmée à la fois.
-        DB::statement("
-            ALTER TABLE reservations
-            ADD COLUMN confirmed_slot_key VARCHAR(100)
-                GENERATED ALWAYS AS (
-                    IF(status = 'confirmed', CONCAT(field_id, '_', time_slot_id), NULL)
-                ) STORED,
-            ADD UNIQUE INDEX uq_confirmed_reservation (confirmed_slot_key)
-        ");
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement("
+                CREATE UNIQUE INDEX uq_confirmed_reservation
+                ON reservations (field_id, time_slot_id)
+                WHERE status = 'confirmed'
+            ");
+        } else {
+            DB::statement("
+                ALTER TABLE reservations
+                ADD COLUMN confirmed_slot_key VARCHAR(100)
+                    GENERATED ALWAYS AS (
+                        IF(status = 'confirmed', CONCAT(field_id, '_', time_slot_id), NULL)
+                    ) STORED,
+                ADD UNIQUE INDEX uq_confirmed_reservation (confirmed_slot_key)
+            ");
+        }
     }
 
     public function down(): void
