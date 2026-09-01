@@ -1,4 +1,4 @@
-﻿<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50">
 
   <!-- Header sticky -->
   <div class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
@@ -174,10 +174,10 @@
               </div>
               <span class="text-xs text-gray-400 block ml-5">→ {{ slot.end_time.substring(0,5) }}</span>
 
-              <button *ngIf="slot.status === 'available'" (click)="deleteSlot(slot.id)"
-                class="mt-2 w-full text-xs text-red-500 font-medium py-1 rounded-lg hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100">
-                Supprimer
-              </button>
+              <button *ngIf="slot.status === 'available'" (click)="deleteSlot(slot.id)" title="Supprimer"
+                  class="mt-2 w-full text-xs text-red-500 font-medium py-1 rounded-lg hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100 flex justify-center">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
               <p *ngIf="slot.status !== 'available'" class="mt-2 text-[10px] text-gray-400 text-center">Non modifiable</p>
             </div>
           </div>
