@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class FieldService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://samaterrain-api.onrender.com/api/v1';
+  private apiUrl = 'http://192.168.1.4:8000/api/v1';
 
   getOwnerFields(): Observable<any> {
     return this.http.get(`${this.apiUrl}/owner/fields`);

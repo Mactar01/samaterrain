@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://samaterrain-api.onrender.com/api/v1/auth';
+  private apiUrl = 'http://192.168.1.4:8000/api/v1/auth';
   private currentUserSubject = new BehaviorSubject<any>(null);
 
   constructor(private http: HttpClient, private router: Router) {

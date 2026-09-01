@@ -142,7 +142,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private notifInterval: any;
 
   loadNotifications() {
-    this.http.get<any>('https://samaterrain-api.onrender.com/api/v1/notifications').subscribe({
+    this.http.get<any>('http://192.168.1.4:8000/api/v1/notifications').subscribe({
       next: (data) => {
         const newUnreadCount = data.unread_count || 0;
         // Si on a plus de notifications non lues qu'avant, on affiche un toast
@@ -170,7 +170,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   markAsRead(id: string) {
-    this.http.patch(`https://samaterrain-api.onrender.com/api/v1/notifications/${id}/read`, {}).subscribe({
+    this.http.patch(`http://192.168.1.4:8000/api/v1/notifications/${id}/read`, {}).subscribe({
       next: () => this.loadNotifications()
     });
   }
