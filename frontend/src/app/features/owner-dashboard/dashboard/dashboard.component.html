@@ -86,7 +86,7 @@
           </div>
           <div class="flex items-center gap-4">
             <!-- Notifications Dropdown / Button (Simulated with unread count) -->
-            <button class="relative p-2 text-gray-400 hover:text-gray-500">
+            <button routerLink="/dashboard/reservations" class="relative p-2 text-gray-400 hover:text-gray-500">
               <span class="sr-only">Voir les notifications</span>
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -216,7 +216,7 @@
           <div *ngFor="let field of fields" class="bg-white overflow-hidden shadow-sm border border-gray-100 rounded-2xl hover:shadow-2xl transition-all duration-300 group flex flex-col transform hover:-translate-y-1">
             <div class="h-40 bg-slate-800 relative overflow-hidden">
               <img class="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity duration-300 group-hover:scale-105" 
-                   [src]="field.primary_image ? ('http://192.168.1.4:8000/storage/' + field.primary_image) : 'https://images.unsplash.com/photo-1575361204481-4d3b6707ea20?q=80&w=1000&auto=format&fit=crop'" alt="Terrain">
+                   [src]="field.primary_image ? ('http://192.168.7.140:8000/storage/' + field.primary_image) : 'https://images.unsplash.com/photo-1575361204481-4d3b6707ea20?q=80&w=1000&auto=format&fit=crop'" alt="Terrain">
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <div class="absolute top-4 right-4">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-green-700 shadow-sm">
@@ -358,5 +358,6 @@
     </main>
   </div>
 </div>
+
 
 

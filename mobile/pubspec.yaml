@@ -1,4 +1,4 @@
-﻿name: my_terrain
+name: my_terrain
 description: Plateforme web et mobile de rÃ©servation de terrains de football.
 
 publish_to: 'none'
@@ -32,6 +32,8 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_map: ^6.1.0
   latlong2: ^0.9.0
+  firebase_core: ^4.14.0
+  firebase_messaging: ^16.6.0
 dev_dependencies:
   url_launcher: ^6.3.0
   geolocator: ^13.0.1

@@ -1,0 +1,103 @@
+﻿<div class="min-h-screen bg-slate-50 flex flex-col">
+  <!-- Navbar simplifiée -->
+  <div class="bg-slate-900 shadow-sm border-b border-slate-800 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="bg-green-500 text-white p-1.5 rounded-lg shadow-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <span class="text-xl font-bold text-white tracking-tight">myTerrain<span class="text-green-500">.</span></span>
+    </div>
+    <div class="flex items-center gap-4">
+      <a routerLink="/dashboard" class="text-slate-300 hover:text-white text-sm font-medium transition-colors">Retour au tableau de bord</a>
+    </div>
+  </div>
+
+  <main class="flex-1 overflow-y-auto p-4 sm:p-8 max-w-7xl mx-auto w-full">
+    <div class="mb-8">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Réservations & Notifications</h1>
+      <p class="mt-1 text-sm text-slate-500">Consultez l'historique complet des réservations sur vos terrains.</p>
+    </div>
+
+    <div *ngIf="loading" class="flex justify-center py-12">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500"></div>
+    </div>
+
+    <div *ngIf="!loading && reservations.length === 0" class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+      <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-slate-900">Aucune réservation</h3>
+      <p class="mt-1 text-slate-500">Vous n'avez pas encore reçu de réservations.</p>
+    </div>
+
+    <div *ngIf="!loading && reservations.length > 0" class="bg-white shadow overflow-hidden sm:rounded-lg border border-slate-200">
+      <ul class="divide-y divide-slate-200">
+        <li *ngFor="let res of reservations" class="p-4 sm:p-6 hover:bg-slate-50 transition-colors">
+          <div class="flex flex-col sm:flex-row justify-between gap-4">
+            <!-- Left Info -->
+            <div>
+              <div class="flex items-center gap-3">
+                <h4 class="text-lg font-bold text-slate-900">{{ res.field?.name }}</h4>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-yellow-100 text-yellow-800': res.status === 'pending',
+                        'bg-green-100 text-green-800': res.status === 'confirmed',
+                        'bg-red-100 text-red-800': res.status === 'cancelled'
+                      }">
+                  {{ res.status === 'confirmed' ? 'Confirmé' : (res.status === 'pending' ? 'En attente' : 'Annulé') }}
+                </span>
+              </div>
+              <div class="mt-2 text-sm text-slate-600 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>{{ res.time_slot?.date | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{{ res.time_slot?.start_time?.substring(0,5) }} - {{ res.time_slot?.end_time?.substring(0,5) }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span>{{ res.user?.name }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <a href="tel:{{res.user?.phone}}" class="text-green-600 hover:underline">{{ res.user?.phone || 'Non renseigné' }}</a>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right Info (Pricing) -->
+            <div class="sm:text-right bg-slate-50 p-3 rounded-lg border border-slate-100 flex flex-col justify-center min-w-[150px]">
+              <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Montants</p>
+              <div class="flex justify-between sm:justify-end gap-4 text-sm mb-1">
+                <span class="text-slate-600">Total:</span>
+                <span class="font-medium text-slate-900">{{ res.total_price }} FCFA</span>
+              </div>
+              <div class="flex justify-between sm:justify-end gap-4 text-sm">
+                <span class="text-slate-600">Acompte payé:</span>
+                <span class="font-bold text-green-600">{{ getPaidAmount(res.payment) }} FCFA</span>
+              </div>
+              <div *ngIf="res.total_price - getPaidAmount(res.payment) > 0" class="flex justify-between sm:justify-end gap-4 text-sm mt-1 pt-1 border-t border-slate-200">
+                <span class="text-red-500 font-medium">Reste:</span>
+                <span class="font-bold text-red-600">{{ res.total_price - getPaidAmount(res.payment) }} FCFA</span>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </main>
+</div>
+
+

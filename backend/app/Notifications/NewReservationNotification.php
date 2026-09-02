@@ -4,9 +4,9 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Reservation;
+use App\Channels\FcmChannel;
 
 class NewReservationNotification extends Notification implements ShouldQueue
 {
@@ -29,8 +29,7 @@ class NewReservationNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        // En prod on pourrait ajouter 'mail' ou 'firebase'
-        return ['database'];
+        return ['database', FcmChannel::class];
     }
 
     /**
@@ -46,12 +45,34 @@ class NewReservationNotification extends Notification implements ShouldQueue
         $time = $this->reservation->timeSlot->start_time ?? '';
         $date = \Carbon\Carbon::parse($this->reservation->timeSlot->date)->format('d/m/Y');
         
+        $creationTime = $this->reservation->created_at ? $this->reservation->created_at->format('H:i') : now()->format('H:i');
+        
         return [
             'reservation_id' => $this->reservation->id,
-            'message'        => "✅ $playerName a confirmé une réservation pour le $date à $time !",
+            'message'        => "✅ $playerName a confirmé une réservation (faite à $creationTime) pour le $date à $time !",
             'amount'         => $this->reservation->total_price,
             'field_id'       => $this->reservation->timeSlot->field_id ?? null,
             'type'           => 'new_reservation'
+        ];
+    }
+
+    /**
+     * Format for FCM
+     */
+    public function toFcm(object $notifiable): array
+    {
+        $this->reservation->loadMissing('user', 'timeSlot.field');
+        $playerName = $this->reservation->user->name ?? 'Un joueur';
+        
+        $creationTime = $this->reservation->created_at ? $this->reservation->created_at->format('H:i') : now()->format('H:i');
+        
+        return [
+            'title' => 'Nouvelle Réservation !',
+            'body' => "✅ À $creationTime, $playerName vient de réserver un créneau. Acompte payé : {$this->reservation->total_price} FCFA.",
+            'data' => [
+                'type' => 'new_reservation',
+                'reservation_id' => (string) $this->reservation->id
+            ]
         ];
     }
 }

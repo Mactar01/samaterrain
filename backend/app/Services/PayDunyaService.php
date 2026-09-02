@@ -1,4 +1,4 @@
-ï»¿<?php
+<?php
 
 namespace App\Services;
 
@@ -25,7 +25,7 @@ class PayDunyaService
         if ($this->masterKey === 'test_master_key') {
             return [
                 'success' => true,
-                'url' => 'https://paydunya.com/sandbox/checkout/simulate_' . $reservation->id,
+                'url' => env('APP_URL', 'http://192.168.1.4:8000') . '/payments/simulate/' . $reservation->id,
                 'token' => 'simulated_token_' . $reservation->id
             ];
         }
@@ -37,7 +37,7 @@ class PayDunyaService
         ])->post($this->baseUrl, [
             'invoice' => [
                 'total_amount' => $amountToPay,
-                'description' => "RÃ©servation myTerrain (ID: {$reservation->id})"
+                'description' => "Réservation myTerrain (ID: {$reservation->id})"
             ],
             'store' => [
                 'name' => 'myTerrain',
@@ -65,7 +65,7 @@ class PayDunyaService
 
         return [
             'success' => false,
-            'message' => 'Erreur lors de la gÃ©nÃ©ration du paiement.'
+            'message' => 'Erreur lors de la génération du paiement.'
         ];
     }
 }

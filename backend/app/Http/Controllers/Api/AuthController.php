@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // POST /api/v1/auth/register
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function register(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -23,7 +23,7 @@ class AuthController extends Controller
             'email'                 => ['required', 'email', 'max:150', 'unique:users'],
             'phone'                 => ['nullable', 'string', 'max:20'],
             'password'              => ['required', 'confirmed', Password::min(8)],
-            // 'role' est désormais forcé à 'player' côté serveur
+            // 'role' est dÃ©sormais forcÃ© Ã  'player' cÃ´tÃ© serveur
         ]);
 
         $user = User::create([
@@ -31,22 +31,22 @@ class AuthController extends Controller
             'email'     => $data['email'],
             'phone'     => $data['phone'] ?? null,
             'password'  => Hash::make($data['password']),
-            'role'      => 'player', // <- Forcé à 'player'
+            'role'      => 'player', // <- ForcÃ© Ã  'player'
             'is_active' => true,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Compte créé avec succès.',
+            'message' => 'Compte crÃ©Ã© avec succÃ¨s.',
             'user'    => $this->userResource($user),
             'token'   => $token,
         ], 201);
     }
 
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // POST /api/v1/auth/login
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -64,36 +64,36 @@ class AuthController extends Controller
 
         if (! $user->is_active) {
             return response()->json([
-                'message' => 'Votre compte a été désactivé. Contactez le support.',
+                'message' => 'Votre compte a Ã©tÃ© dÃ©sactivÃ©. Contactez le support.',
             ], 403);
         }
 
-        // Révoquer les anciens tokens et créer un nouveau
+        // RÃ©voquer les anciens tokens et crÃ©er un nouveau
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Connexion réussie.',
+            'message' => 'Connexion rÃ©ussie.',
             'user'    => $this->userResource($user),
             'token'   => $token,
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // POST /api/v1/auth/logout
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Déconnecté avec succès.',
+            'message' => 'DÃ©connectÃ© avec succÃ¨s.',
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // GET /api/v1/auth/me
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function me(Request $request): JsonResponse
     {
         $user = $request->user()->load('owner');
@@ -103,9 +103,9 @@ class AuthController extends Controller
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // PUT /api/v1/auth/profile
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -117,7 +117,7 @@ class AuthController extends Controller
             'new_password'             => ['nullable', 'confirmed', Password::min(8)],
         ]);
 
-        // Vérification mot de passe actuel si changement demandé
+        // VÃ©rification mot de passe actuel si changement demandÃ©
         if (!empty($data['new_password'])) {
             if (!Hash::check($data['current_password'], $user->password)) {
                 throw ValidationException::withMessages([
@@ -133,14 +133,14 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'message' => 'Profil mis à jour avec succès.',
+            'message' => 'Profil mis Ã  jour avec succÃ¨s.',
             'user'    => $this->userResource($user->fresh('owner')),
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Helper : formater la réponse utilisateur
-    // ─────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Helper : formater la rÃ©ponse utilisateur
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private function userResource(User $user): array
     {
         $data = [
@@ -163,5 +163,17 @@ class AuthController extends Controller
         }
 
         return $data;
+    }
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $request->validate([
+            'fcm_token' => ['required', 'string'],
+        ]);
+
+        $request->user()->update([
+            'fcm_token' => $request->fcm_token,
+        ]);
+
+        return response()->json(['message' => 'FCM Token mis à jour avec succès.']);
     }
 }

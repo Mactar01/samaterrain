@@ -13,7 +13,7 @@ class DioClient {
   DioClient._internal() {
     // URL locale pour les tests sur réseau WiFi partagé
     // Le téléphone et le PC doivent être sur le même WiFi
-    String baseUrl = 'http://192.168.1.4:8000/api/v1';
+    String baseUrl = 'http://192.168.7.140:8000/api/v1';
 
     dio = Dio(BaseOptions(
       baseUrl: baseUrl,

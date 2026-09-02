@@ -300,7 +300,7 @@ class _HomePageState extends State<HomePage> {
                       String? imageUrl;
                       if (field['primary_image'] != null) {
                         final path = field['primary_image']['url'];
-                        imageUrl = 'http://192.168.1.4:8000$path';
+                        imageUrl = 'http://192.168.7.140:8000$path';
                       }
 
                       return Card(

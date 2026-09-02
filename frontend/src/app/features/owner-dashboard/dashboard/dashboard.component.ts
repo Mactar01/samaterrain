@@ -78,14 +78,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.adminService.createOwner(this.newOwner).subscribe({
       next: (res) => {
         this.ownerCreating = false;
-        this.confirmationService.toast("Loueur crÃ©Ã© avec succÃ¨s !", "success");
+        this.confirmationService.toast("Loueur créé avec succès !", "success");
         this.newOwner = { name: '', email: '', password: '', password_confirmation: '', phone: '', business_name: '' };
         this.loadOwnersList();
         this.loadAdminData(); // Refresh stats
       },
       error: (err) => {
         this.ownerCreating = false;
-        this.confirmationService.error(err.error?.message || "Erreur lors de la crÃ©ation. VÃ©rifiez les informations.");
+        this.confirmationService.error(err.error?.message || "Erreur lors de la création. Vérifiez les informations.");
       }
     });
   }
@@ -109,16 +109,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.adminService.updateOwner(this.editingOwner.id, this.editForm).subscribe({
       next: () => {
         this.editingOwner = null;
-        this.confirmationService.toast("Partenaire mis Ã  jour", "success");
+        this.confirmationService.toast("Partenaire mis à jour", "success");
         this.loadOwnersList();
       },
-      error: (err) => this.confirmationService.error("Erreur lors de la mise Ã  jour.")
+      error: (err) => this.confirmationService.error("Erreur lors de la mise à jour.")
     });
   }
 
   toggleStatus(owner: any) {
     this.adminService.toggleOwnerStatus(owner.id).subscribe(() => {
-      this.confirmationService.toast("Statut mis Ã  jour", "success");
+      this.confirmationService.toast("Statut mis à jour", "success");
       this.loadOwnersList();
     });
   }
@@ -126,14 +126,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   async deleteOwner(owner: any) {
     const confirmed = await this.confirmationService.confirm({
       title: 'Supprimer ce partenaire ?',
-      text: `ÃŠtes-vous sÃ»r de vouloir supprimer dÃ©finitivement le partenaire ${owner.business_name} ?`,
+      text: `Êtes-vous sûr de vouloir supprimer définitivement le partenaire ${owner.business_name} ?`,
       confirmButtonText: 'Oui, supprimer',
       confirmButtonColor: '#ef4444' // red-500
     });
 
     if (confirmed) {
       this.adminService.deleteOwner(owner.id).subscribe(() => {
-        this.confirmationService.toast("Partenaire supprimÃ©", "success");
+        this.confirmationService.toast("Partenaire supprimé", "success");
         this.loadOwnersList();
         this.loadAdminData();
       });
@@ -143,7 +143,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private notifInterval: any;
 
   loadNotifications() {
-    this.http.get<any>('http://192.168.1.4:8000/api/v1/notifications').subscribe({
+    this.http.get<any>('http://192.168.7.140:8000/api/v1/notifications').subscribe({
       next: (data) => {
         const newUnreadCount = data.unread_count || 0;
         // Si on a plus de notifications non lues qu'avant, on affiche un toast
@@ -171,7 +171,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   markAsRead(id: string) {
-    this.http.patch(`http://192.168.1.4:8000/api/v1/notifications/${id}/read`, {}).subscribe({
+    this.http.patch(`http://192.168.7.140:8000/api/v1/notifications/${id}/read`, {}).subscribe({
       next: () => this.loadNotifications()
     });
   }

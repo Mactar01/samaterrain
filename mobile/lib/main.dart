@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/data/auth_repository.dart';
@@ -8,10 +8,23 @@ import 'features/fields/presentation/bloc/field_cubit.dart';
 import 'features/booking/data/booking_repository.dart';
 import 'features/booking/presentation/bloc/booking_cubit.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/services/push_notification_service.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('fr_FR', null);
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await PushNotificationService().initialize();
+  } catch (e) {
+    print('Firebase non configure');
+  } catch (e) {
+    print('Firebase non configure');
+  }
   runApp(const MyTerrainApp());
 }
 
@@ -74,3 +87,7 @@ class MyTerrainApp extends StatelessWidget {
     );
   }
 }
+
+
+
+

@@ -2,6 +2,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/network/dio_client.dart';
 import '../bloc/booking_cubit.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -40,6 +41,23 @@ class _PaymentPageState extends State<PaymentPage> {
   void initState() {
     super.initState();
     _customAmountController.text = minAmount.toStringAsFixed(0);
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final response = await DioClient().dio.get('/auth/me');
+      if (response.statusCode == 200 && mounted) {
+        final phone = response.data['phone']?.toString();
+        if (phone != null && phone.isNotEmpty) {
+          setState(() {
+            _phoneController.text = phone.replaceAll('+221', '');
+          });
+        }
+      }
+    } catch (e) {
+      // Ignore errors silently
+    }
   }
 
   String get paymentTypeForApi {
@@ -435,6 +453,8 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 }
+
+
 
 
 

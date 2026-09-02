@@ -1,48 +1,65 @@
-# myTerrain 🏟️
+﻿# myTerrain ⚽
 
-> Plateforme numérique de réservation de terrains de football
+**myTerrain** est une plateforme complète de réservation de terrains de football (Five) au Sénégal. 
+Elle permet aux gérants de terrains de digitaliser leurs plannings et leurs paiements, et aux joueurs de trouver et réserver facilement des créneaux horaires.
 
-## Architecture
+## 📱 Fonctionnalités
 
-| Couche | Technologie | Dossier |
-|---|---|---|
-| Mobile | Flutter 3 + Dart | `mobile/` |
-| Web | Angular 17 + TailwindCSS | `frontend/` |
-| Backend | Laravel 11 + PHP 8.2 | `backend/` |
-| Base de données | MySQL 8.0 | — |
-| Auth | Laravel Sanctum | — |
-| Notifications | Firebase Cloud Messaging | — |
-| Déploiement | Docker + Docker Compose | `docker/` |
+### 🧑‍💻 Application Mobile (Joueurs - Flutter)
+* **Recherche et filtres** : Localisez les terrains à proximité ou selon vos préférences.
+* **Réservation de créneaux** : Visualisez les disponibilités en temps réel et sélectionnez un créneau horaire.
+* **Paiement mobile** : Intégration de PayDunya (Wave, Orange Money, Free Money, Carte Bancaire) pour payer l'acompte (50%) ou la totalité.
+* **Gestion du profil** : Suivi des réservations (à venir, passées) et mise à jour des infos personnelles.
 
-## Structure du projet
+### 🏢 Tableau de bord Web (Gérants - Angular 17+)
+* **Gestion des infrastructures** : Ajoutez et paramétrez vos terrains (tarifs, équipements, type de gazon).
+* **Gestion des créneaux horaires** : Définissez vos plages d'ouverture manuellement ou générez-les automatiquement.
+* **Suivi des réservations & Notifications** : Visualisez instantanément les nouvelles réservations payées, avec les acomptes versés et les coordonnées des joueurs.
 
-```
-myTerrain/
-├── backend/          ← API REST Laravel
-├── frontend/         ← Application web Angular
-├── mobile/           ← Application Flutter Android/iOS
-├── docker/           ← Configurations Docker & Docker Compose
-└── docs/
-    ├── uml/          ← Diagrammes UML (cas d'utilisation, séquence)
-    ├── api/          ← Documentation des endpoints REST
-    └── db/           ← Schéma MySQL et migrations
-```
+### ⚙️ Backend API (Laravel 11)
+* **API RESTful** sécurisée par Laravel Sanctum (Tokens).
+* **Système de Webhook** pour la validation automatique des paiements asynchrones via PayDunya.
+* **Gestion automatisée des statuts** (Créneau disponible -> En attente de paiement -> Réservé).
+* **Système de notification (SMS / WhatsApp)** avec Twilio pour prévenir les gérants en temps réel d'une nouvelle réservation (mode développement intégré).
 
-## Démarrage rapide
+## 🛠️ Stack Technique
 
-```bash
-# Backend
-cd backend && composer install && cp .env.example .env && php artisan migrate --seed
+* **Frontend Mobile :** Flutter (Dart)
+* **Frontend Web :** Angular 17 (TypeScript) + TailwindCSS
+* **Backend :** Laravel 11 (PHP 8.2+)
+* **Base de données :** MySQL
+* **Paiement :** API PayDunya
 
-# Frontend
-cd frontend && npm install && ng serve
+## 🚀 Installation locale (Mode Développement)
 
-# Mobile
-cd mobile && flutter pub get && flutter run
-```
+### 1. Backend (Laravel)
+\\\ash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve --host=0.0.0.0 --port=8000
+\\\
 
-## Documentation
+### 2. Frontend Web (Angular)
+\\\ash
+cd frontend
+npm install
+npm start
+\\\
+*(Le tableau de bord sera disponible sur http://localhost:4200)*
 
-- [Schéma base de données](docs/db/schema.sql)
-- [Endpoints REST](docs/api/endpoints.md)
-- [Diagrammes UML](docs/uml/)
+### 3. Application Mobile (Flutter)
+\\\ash
+cd mobile
+flutter pub get
+flutter run
+\\\
+
+## 🧪 Simulation de paiement (Sandbox)
+Si vous ne possédez pas encore de clés d'API PayDunya en production, l'application fonctionnera en mode simulation. Lors d'un paiement, vous serez redirigé vers une page locale qui simulera le retour de PayDunya et validera la transaction.
+Pour activer le mode de production, renseignez \PAYDUNYA_MASTER_KEY\, \PAYDUNYA_PRIVATE_KEY\ et \PAYDUNYA_TOKEN\ dans le fichier \.env\ du backend.
+
+---
+*Conçu avec ❤️ pour simplifier le football.*
