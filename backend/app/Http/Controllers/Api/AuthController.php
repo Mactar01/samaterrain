@@ -25,50 +25,62 @@ class AuthController extends Controller
             'password'              => ['required', 'confirmed', Password::min(8)],
         ]);
 
-        $otp = rand(1000, 9999);
+        // OTP TEMPORAIREMENT DESACTIVE (commenté)
+        // $otp = rand(1000, 9999);
 
         $user = User::create([
             'name'           => $data['name'],
             'phone'          => $data['phone'],
             'password'       => Hash::make($data['password']),
             'role'           => 'player',
-            'is_active'      => false, // Require OTP validation
-            'otp_code'       => $otp,
-            'otp_expires_at' => now()->addMinutes(10),
+            'is_active'      => true, // Remis à true pour ne pas bloquer le mobile
+            // 'otp_code'       => $otp,
+            // 'otp_expires_at' => now()->addMinutes(10),
         ]);
 
-        // Simuler l'envoi du SMS en l'affichant dans le log/terminal du serveur
-        \Log::info("=== SIMULATION SMS ===");
-        \Log::info("Numéro : {$user->phone}");
-        \Log::info("Code OTP : {$otp}");
-        \Log::info("======================");
+        // \Log::info("=== SIMULATION SMS ===");
+        // \Log::info("Numéro : {$user->phone}");
+        // \Log::info("Code OTP : {$otp}");
+        // \Log::info("======================");
+
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Compte créé avec succès. Un code OTP a été envoyé par SMS.',
-            'phone'   => $user->phone
+            'message' => 'Compte créé avec succès.',
+            'user'    => $this->userResource($user),
+            'token'   => $token,
         ], 201);
     }
 
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'phone'    => ['required', 'string'],
+            'email'    => ['nullable', 'string'],
+            'phone'    => ['nullable', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::where('phone', $data['phone'])->first();
+        if (empty($data['email']) && empty($data['phone'])) {
+            throw ValidationException::withMessages([
+                'email' => ['L\'email ou le numéro de téléphone est requis.'],
+            ]);
+        }
+
+        $loginField = !empty($data['email']) ? 'email' : 'phone';
+        $user = User::where($loginField, $data[$loginField])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'phone' => ['Les identifiants sont incorrects.'],
+                $loginField => ['Les identifiants sont incorrects.'],
             ]);
         }
 
-        if (! $user->is_active) {
-            throw ValidationException::withMessages([
-                'phone' => ['Votre compte n\'est pas encore activé. Veuillez vérifier votre numéro avec le code OTP.'],
-            ]);
-        }
+        // OTP TEMPORAIREMENT DESACTIVE
+        // if (! $user->is_active) {
+        //     throw ValidationException::withMessages([
+        //         $loginField => ['Votre compte n\'est pas encore activé. Veuillez vérifier votre numéro avec le code OTP.'],
+        //     ]);
+        // }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
