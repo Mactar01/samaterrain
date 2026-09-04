@@ -66,12 +66,12 @@ class AuthController extends Controller
             ]);
         }
 
-        $loginField = !empty($data['email']) ? 'email' : 'phone';
-        $user = User::where($loginField, $data[$loginField])->first();
+        $loginValue = !empty($data['email']) ? $data['email'] : $data['phone'];
+        $user = User::where('email', $loginValue)->orWhere('phone', $loginValue)->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
-                $loginField => ['Les identifiants sont incorrects.'],
+                'email' => ['Les identifiants sont incorrects.'],
             ]);
         }
 
