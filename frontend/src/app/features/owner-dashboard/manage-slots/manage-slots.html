@@ -277,14 +277,14 @@
 
 
 
-<!-- Modal R�servation Manuelle -->
+<!-- Modal R�servation Manuelle -->
 <div *ngIf="showManualReserveModal" class="fixed inset-0 z-50 overflow-y-auto">
   <div class="flex min-h-full items-center justify-center p-4">
     <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" (click)="showManualReserveModal = false"></div>
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 z-10">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-lg font-bold text-gray-900">?? R�servation Manuelle</h3>
+          <h3 class="text-lg font-bold text-gray-900">?? R�servation Manuelle</h3>
           <p class="text-sm text-gray-500 mt-0.5">{{ selectedSlotToReserve?.start_time?.substring(0,5) }} - {{ selectedSlotToReserve?.end_time?.substring(0,5) }}</p>
         </div>
         <button (click)="showManualReserveModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
@@ -300,7 +300,7 @@
             class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">T�l�phone</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">T�l�phone</label>
           <input type="tel" [(ngModel)]="manualReserve.playerPhone" placeholder="+221 77 000 00 00"
             class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
@@ -311,7 +311,67 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
-          {{ isReserving ? 'R�servation...' : 'Confirmer la r�servation' }}
+          {{ isReserving ? 'R�servation...' : 'Confirmer la r�servation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Blocage -->
+<div *ngIf="showBlockModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" (click)="showBlockModal = false"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 z-10">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Bloquer le créneau</h3>
+          <p class="text-sm text-gray-500 mt-0.5">{{ selectedSlotToBlock?.start_time?.substring(0,5) }} - {{ selectedSlotToBlock?.end_time?.substring(0,5) }}</p>
+        </div>
+        <button (click)="showBlockModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Raison de l'indisponibilité</label>
+          <div class="grid grid-cols-1 gap-2">
+            <label class="flex items-center p-3 border rounded-xl cursor-pointer hover:bg-orange-50 transition-colors"
+              [ngClass]="{'border-orange-500 bg-orange-50': blockReason === 'Rénovation / Travaux'}">
+              <input type="radio" name="reason" [(ngModel)]="blockReason" value="Rénovation / Travaux" class="text-orange-500 focus:ring-orange-500 w-4 h-4">
+              <span class="ml-3 text-sm font-medium text-gray-700">Rénovation / Travaux</span>
+            </label>
+            <label class="flex items-center p-3 border rounded-xl cursor-pointer hover:bg-orange-50 transition-colors"
+              [ngClass]="{'border-orange-500 bg-orange-50': blockReason === 'Imprévu (Météo, etc.)'}">
+              <input type="radio" name="reason" [(ngModel)]="blockReason" value="Imprévu (Météo, etc.)" class="text-orange-500 focus:ring-orange-500 w-4 h-4">
+              <span class="ml-3 text-sm font-medium text-gray-700">Imprévu (Météo, etc.)</span>
+            </label>
+            <label class="flex items-center p-3 border rounded-xl cursor-pointer hover:bg-orange-50 transition-colors"
+              [ngClass]="{'border-orange-500 bg-orange-50': blockReason === 'Fermeture exceptionnelle'}">
+              <input type="radio" name="reason" [(ngModel)]="blockReason" value="Fermeture exceptionnelle" class="text-orange-500 focus:ring-orange-500 w-4 h-4">
+              <span class="ml-3 text-sm font-medium text-gray-700">Fermeture exceptionnelle</span>
+            </label>
+            <label class="flex items-center p-3 border rounded-xl cursor-pointer hover:bg-orange-50 transition-colors"
+              [ngClass]="{'border-orange-500 bg-orange-50': blockReason === 'Autre'}">
+              <input type="radio" name="reason" [(ngModel)]="blockReason" value="Autre" class="text-orange-500 focus:ring-orange-500 w-4 h-4">
+              <span class="ml-3 text-sm font-medium text-gray-700">Autre</span>
+            </label>
+          </div>
+          
+          <input *ngIf="blockReason === 'Autre'" type="text" [(ngModel)]="blockCustomReason" placeholder="Précisez la raison..."
+            class="mt-3 w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+        </div>
+        
+        <button (click)="confirmBlock()" [disabled]="isBlocking"
+          class="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+          <svg *ngIf="isBlocking" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ isBlocking ? 'Blocage en cours...' : 'Confirmer le blocage' }}
         </button>
       </div>
     </div>

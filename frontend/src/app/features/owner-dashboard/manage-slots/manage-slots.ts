@@ -35,6 +35,12 @@ export class ManageSlotsComponent implements OnInit {
   isAdding = false;
   isBulkGenerating = false;
   showBulkModal = false;
+  
+  showBlockModal = false;
+  isBlocking = false;
+  selectedSlotToBlock: any = null;
+  blockReason = 'Rénovation / Travaux';
+  blockCustomReason = '';
 
   // Manual Reserve
   showManualReserveModal = false;

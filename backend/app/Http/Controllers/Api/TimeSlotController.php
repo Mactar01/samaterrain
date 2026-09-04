@@ -94,11 +94,16 @@ class TimeSlotController extends Controller
         
         $data = $request->validate([
             'status' => 'sometimes|in:available,blocked',
-            'price' => 'nullable|numeric|min:0'
+            'price' => 'nullable|numeric|min:0',
+            'block_reason' => 'nullable|string|max:255'
         ]);
 
         if ($slot->status === 'reserved' && isset($data['status']) && $data['status'] === 'blocked') {
             return response()->json(['message' => 'Impossible de bloquer un créneau déjà réservé.'], 403);
+        }
+
+        if (isset($data['status']) && $data['status'] === 'available') {
+            $data['block_reason'] = null; // Clear reason if made available
         }
 
         $slot->update($data);
