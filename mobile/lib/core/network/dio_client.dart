@@ -14,7 +14,7 @@ class DioClient {
     // URL locale pour les tests sur réseau WiFi partagé
     // Le téléphone et le PC doivent être sur le même WiFi
     // const String baseUrl = 'http://192.168.7.140:8000/api/v1'; // Local
-    const String baseUrl = 'https://releases-jar-perth-sage.trycloudflare.com/api/v1'; // Cloudflare Tunnel (Très stable)
+    const String baseUrl = 'https://hdtv-explorer-stored-serial.trycloudflare.com/api/v1'; // Cloudflare Tunnel (Très stable)
 
     dio = Dio(BaseOptions(
       baseUrl: baseUrl,

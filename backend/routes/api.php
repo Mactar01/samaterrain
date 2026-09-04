@@ -100,7 +100,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/fields/{field}/images/{image}', [FieldImageController::class, 'destroy']);
             Route::patch('/fields/{field}/images/{image}/primary', [FieldImageController::class, 'setPrimary']);
 
-            Route::get('/fields/{field}/slots', [TimeSlotController::class, 'index']);
             Route::post('/fields/{field}/slots',        [TimeSlotController::class, 'store']);
             Route::delete('/fields/{field}/slots/{slot}', [TimeSlotController::class, 'destroy']);
             Route::put('/fields/{field}/slots/{slot}',  [TimeSlotController::class, 'update']);
