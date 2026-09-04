@@ -17,7 +17,7 @@ class ReservationController extends Controller
     use AuthorizesRequests;
 
     /**
-     * Liste des rÃƒÂ©servations du joueur connectÃƒÂ©
+     * Liste des rÃƒÆ’Ã‚Â©servations du joueur connectÃƒÆ’Ã‚Â©
      */
     public function index(Request $request)
     {
@@ -30,7 +30,7 @@ class ReservationController extends Controller
     }
 
     /**
-     * Liste des rÃƒÂ©servations pour le loueur connectÃƒÂ©
+     * Liste des rÃƒÆ’Ã‚Â©servations pour le loueur connectÃƒÆ’Ã‚Â©
      */
     public function ownerIndex(Request $request)
     {
@@ -48,7 +48,7 @@ class ReservationController extends Controller
     }
 
     /**
-     * DÃƒÂ©tails d'une rÃƒÂ©servation
+     * DÃƒÆ’Ã‚Â©tails d'une rÃƒÆ’Ã‚Â©servation
      */
     public function show(Request $request, $id)
     {
@@ -59,19 +59,19 @@ class ReservationController extends Controller
     }
 
     /**
-     * CrÃƒÂ©er une rÃƒÂ©servation (Anti double-booking via transactions & locks)
+     * CrÃƒÆ’Ã‚Â©er une rÃƒÆ’Ã‚Â©servation (Anti double-booking via transactions & locks)
      */
     public function store(StoreReservationRequest $request)
     {
         try {
             $reservation = DB::transaction(function () use ($request) {
-                // VERROUILLAGE PESSIMISTE : on verrouille la ligne du crÃƒÂ©neau en BDD
-                // Personne d'autre ne peut lire/modifier ce crÃƒÂ©neau jusqu'ÃƒÂ  la fin de la transaction.
+                // VERROUILLAGE PESSIMISTE : on verrouille la ligne du crÃƒÆ’Ã‚Â©neau en BDD
+                // Personne d'autre ne peut lire/modifier ce crÃƒÆ’Ã‚Â©neau jusqu'ÃƒÆ’Ã‚Â  la fin de la transaction.
                 $slot = TimeSlot::where('id', $request->time_slot_id)->lockForUpdate()->firstOrFail();
 
                 if (!$slot->isAvailable()) {
-                    // Annulation de la transaction, le crÃƒÂ©neau est dÃƒÂ©jÃƒÂ  pris !
-                    abort(409, 'Ce crÃƒÂ©neau n\'est plus disponible.');
+                    // Annulation de la transaction, le crÃƒÆ’Ã‚Â©neau est dÃƒÆ’Ã‚Â©jÃƒÆ’Ã‚Â  pris !
+                    abort(409, 'Ce crÃƒÆ’Ã‚Â©neau n\'est plus disponible.');
                 }
 
                 $user = $request->user();
@@ -82,7 +82,7 @@ class ReservationController extends Controller
                 $owner = $field->owner;
                 $commission = $price * ($owner->commission_rate / 100);
 
-                // 1. CrÃƒÂ©er la rÃƒÂ©servation en 'pending'
+                // 1. CrÃƒÆ’Ã‚Â©er la rÃƒÆ’Ã‚Â©servation en 'pending'
                 $reservation = Reservation::create([
                     'user_id'      => $user->id,
                     'field_id'     => $field->id,
@@ -93,77 +93,78 @@ class ReservationController extends Controller
                     'notes'        => $request->notes,
                 ]);
 
-                // On NE met PAS le crÃƒÂ©neau en 'reserved' ici car il n'a pas encore payÃƒÂ© l'acompte.
+                // On NE met PAS le crÃƒÆ’Ã‚Â©neau en 'reserved' ici car il n'a pas encore payÃƒÆ’Ã‚Â© l'acompte.
                 // Il restera 'available' jusqu'au paiement.
 
                 return $reservation;
             });
 
             return response()->json([
-                'message'     => 'RÃƒÂ©servation mise en attente de paiement.',
+                'message'     => 'RÃƒÆ’Ã‚Â©servation mise en attente de paiement.',
                 'reservation' => $reservation->load(['field', 'timeSlot'])
             ], 201);
 
         } catch (QueryException $e) {
-            // SÃƒÂ©curitÃƒÂ© niveau 2 : La base de donnÃƒÂ©es a rejetÃƒÂ© l'insertion (Unique Index)
+            // SÃƒÆ’Ã‚Â©curitÃƒÆ’Ã‚Â© niveau 2 : La base de donnÃƒÆ’Ã‚Â©es a rejetÃƒÆ’Ã‚Â© l'insertion (Unique Index)
             return response()->json([
-                'message' => 'Conflit de rÃƒÂ©servation. Le crÃƒÂ©neau a ÃƒÂ©tÃƒÂ© rÃƒÂ©servÃƒÂ© ÃƒÂ  la mÃƒÂªme milliseconde par un autre joueur.'
+                'message' => 'Conflit de rÃƒÆ’Ã‚Â©servation. Le crÃƒÆ’Ã‚Â©neau a ÃƒÆ’Ã‚Â©tÃƒÆ’Ã‚Â© rÃƒÆ’Ã‚Â©servÃƒÆ’Ã‚Â© ÃƒÆ’Ã‚Â  la mÃƒÆ’Ã‚Âªme milliseconde par un autre joueur.'
             ], 409);
         } catch (\Exception $e) {
-            // RÃƒÂ©cupÃƒÂ¨re l'abort(409)
-            if ($e->getCode() == 409 || $e->getMessage() == 'Ce crÃƒÂ©neau n\'est plus disponible.') {
-                return response()->json(['message' => 'Ce crÃƒÂ©neau n\'est plus disponible.'], 409);
+            // RÃƒÆ’Ã‚Â©cupÃƒÆ’Ã‚Â¨re l'abort(409)
+            if ($e->getCode() == 409 || $e->getMessage() == 'Ce crÃƒÆ’Ã‚Â©neau n\'est plus disponible.') {
+                return response()->json(['message' => 'Ce crÃƒÆ’Ã‚Â©neau n\'est plus disponible.'], 409);
             }
             throw $e;
         }
     }
 
     /**
-     * Annuler une rÃƒÂ©servation
+     * Annuler une rÃƒÆ’Ã‚Â©servation
      */
     public function cancel(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);
         $this->authorize('cancel', $reservation);
 
-        if (!$reservation->canBeCancelled()) {
-            return response()->json(['message' => 'Cette rÃƒÂ©servation ne peut plus ÃƒÂªtre annulÃƒÂ©e.'], 400);
+        if ($reservation->status === 'cancelled') {
+            return response()->json(['message' => 'Cette réservation est déjà annulée.'], 400);
         }
 
-        DB::transaction(function () use ($reservation) {
+        DB::transaction(function () use ($reservation, $request) {
+            $isOwner = $request->user()->isOwner();
+            $reason = $isOwner ? 'Annulée par le gérant' : 'Annulée par le joueur';
+
             $reservation->update([
                 'status'        => 'cancelled',
                 'cancelled_at'  => now(),
-                'cancel_reason' => 'AnnulÃƒÂ©e par le joueur'
+                'cancel_reason' => $reason
             ]);
 
-            // LibÃƒÂ©rer le crÃƒÂ©neau
-            $reservation->timeSlot->update(['status' => 'available']);
+            if ($reservation->timeSlot) {
+                $reservation->timeSlot->update(['status' => 'available']);
+            }
         });
 
-        return response()->json(['message' => 'RÃƒÂ©servation annulÃƒÂ©e avec succÃƒÂ¨s.']);
+        return response()->json(['message' => 'Réservation annulée avec succès.']);
     }
-
-    /**
-     * Confirmer une rÃƒÂ©servation (Action du Loueur)
-     */
     public function confirm(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);
         $this->authorize('confirm', $reservation);
 
         if (!$reservation->isPending()) {
-            return response()->json(['message' => 'La rÃƒÂ©servation n\'est pas en attente.'], 400);
+            return response()->json(['message' => 'La rÃƒÆ’Ã‚Â©servation n\'est pas en attente.'], 400);
         }
 
         $reservation->update(['status' => 'confirmed']);
 
         return response()->json([
-            'message' => 'RÃƒÂ©servation confirmÃƒÂ©e.',
+            'message' => 'RÃƒÆ’Ã‚Â©servation confirmÃƒÆ’Ã‚Â©e.',
             'reservation' => $reservation
         ]);
     }
 }
+
 
 
 

@@ -11,6 +11,7 @@ class Field extends Model
 
     protected $fillable = [
         'owner_id',
+        'photo',
         'name',
         'description',
         'address',
@@ -27,6 +28,20 @@ class Field extends Model
         'is_featured',
     ];
 
+        protected $appends = ['photo_url'];
+
+    public function getPhotoUrlAttribute()
+    {
+        if ($this->photo) {
+            return url('storage/' . $this->photo);
+        }
+        // Check if there is a primary image from the old relationship (fallback)
+        if ($this->relationLoaded('primaryImage') && $this->primaryImage) {
+            return url($this->primaryImage->url);
+        }
+        return null;
+    }
+
     protected function casts(): array
     {
         return [
@@ -39,7 +54,7 @@ class Field extends Model
         ];
     }
 
-    // ─── Relations ──────────────────────────────────────────────────
+    // â”€â”€â”€ Relations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function owner()
     {
@@ -81,7 +96,7 @@ class Field extends Model
         return $this->hasMany(FootballMatch::class);
     }
 
-    // ─── Scopes ─────────────────────────────────────────────────────
+    // â”€â”€â”€ Scopes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function scopeActive($query)
     {
@@ -95,7 +110,7 @@ class Field extends Model
 
     /**
      * Filtre les terrains dans un rayon (en km) autour d'un point GPS.
-     * Formule de Haversine approximée.
+     * Formule de Haversine approximÃ©e.
      */
     public function scopeNearby($query, float $lat, float $lng, int $radiusKm = 10)
     {
@@ -111,7 +126,7 @@ class Field extends Model
             ->orderBy('distance_km');
     }
 
-    // ─── Accessors ──────────────────────────────────────────────────
+    // â”€â”€â”€ Accessors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public function getAvgRatingAttribute(): float
     {
@@ -123,3 +138,5 @@ class Field extends Model
         return $this->reviews()->count();
     }
 }
+
+

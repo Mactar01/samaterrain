@@ -101,3 +101,7 @@ Route::get('/payments/simulate-confirm/{id}', function ($id) {
 
     return redirect('http://localhost:8080/');
 });
+
+Route::get('/api/documentation', function () {
+    return file_get_contents(resource_path('views/swagger.blade.php'));
+});

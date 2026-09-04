@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Field;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Owner;
 use App\Http\Requests\StoreFieldRequest;
 use App\Http\Requests\UpdateFieldRequest;
@@ -106,14 +107,28 @@ class FieldController extends Controller
         
         $this->authorize('update', $field);
 
-        $field->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($field->photo) {
+                Storage::disk('public')->delete($field->photo);
+            }
+            // Store new photo
+            $path = $request->file('photo')->store('fields', 'public');
+            $validated['photo'] = $path;
+        }
+
+        $field->update($validated);
+
+        // Include full url for photo if needed
+        $field->photo_url = $field->photo ? url('storage/' . $field->photo) : null;
 
         return response()->json([
             'message' => 'Terrain mis à jour avec succès.',
             'field' => $field
         ]);
     }
-
     /**
      * Suppression d'un terrain
      */

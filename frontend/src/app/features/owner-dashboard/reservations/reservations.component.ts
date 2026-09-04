@@ -34,4 +34,20 @@ export class ReservationsComponent implements OnInit {
     if (!payment || payment.status !== 'completed') return 0;
     return payment.amount || 0;
   }
+
+  cancelReservation(id: number) {
+    if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+      this.reservationService.cancelReservation(id).subscribe({
+        next: (res) => {
+          alert('Réservation annulée avec succès');
+          this.ngOnInit(); // reload
+        },
+        error: (err) => {
+          console.error(err);
+          alert("Erreur lors de l'annulation");
+        }
+      });
+    }
+  }
 }
+

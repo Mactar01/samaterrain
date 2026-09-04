@@ -22,9 +22,11 @@ export class LoginComponent {
     this.error = '';
     this.authService.login(this.credentials).subscribe({
         next: (res) => {
-          if (res.user.role === 'owner' || res.user.role === 'admin') {
-            this.router.navigate(['/dashboard']);
-          } else {
+          if (res.user.role === 'admin') {
+              this.router.navigate(['/admin-dashboard']);
+            } else if (res.user.role === 'owner') {
+              this.router.navigate(['/dashboard']);
+            } else {
             this.error = 'Accès réservé aux loueurs et administrateurs.';
           }
           this.isLoading = false;

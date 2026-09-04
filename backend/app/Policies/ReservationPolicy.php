@@ -27,7 +27,9 @@ class ReservationPolicy
 
     public function cancel(User $user, Reservation $reservation)
     {
-        return $reservation->user_id === $user->id;
+        if ($reservation->user_id === $user->id) return true;
+        if ($user->isOwner() && $reservation->field->owner->user_id === $user->id) return true;
+        return false;
     }
 
     public function confirm(User $user, Reservation $reservation)

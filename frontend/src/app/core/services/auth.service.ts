@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://192.168.7.140:8000/api/v1/auth';
+  private apiUrl = 'http://localhost:8000/api/v1/auth';
   private currentUserSubject = new BehaviorSubject<any>(null);
 
   constructor(private http: HttpClient, private router: Router) {

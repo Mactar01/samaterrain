@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class FieldService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://192.168.7.140:8000/api/v1';
+  private apiUrl = 'http://localhost:8000/api/v1';
 
   getOwnerFields(): Observable<any> {
     return this.http.get(`${this.apiUrl}/owner/fields`);
@@ -29,7 +29,17 @@ export class FieldService {
     return this.http.delete(`${this.apiUrl}/fields/${fieldId}/slots/${slotId}`);
   }
 
-  updateField(fieldId: number, fieldData: any): Observable<any> {
+    updateField(fieldId: number, fieldData: any): Observable<any> {
+    if (fieldData.photo) {
+      const formData = new FormData();
+      formData.append('_method', 'PUT');
+      Object.keys(fieldData).forEach(key => {
+        if (fieldData[key] !== null && fieldData[key] !== undefined) {
+          formData.append(key, fieldData[key]);
+        }
+      });
+      return this.http.post(`${this.apiUrl}/fields/${fieldId}`, formData);
+    }
     return this.http.put(`${this.apiUrl}/fields/${fieldId}`, fieldData);
   }
 }

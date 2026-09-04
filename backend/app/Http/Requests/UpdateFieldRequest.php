@@ -27,6 +27,8 @@ class UpdateFieldRequest extends FormRequest
             'currency'       => 'nullable|string|max:5',
             'amenities'      => 'nullable|array',
             'is_active'      => 'nullable|boolean',
+            'photo'          => 'nullable|image|max:5120',
         ];
     }
 }
+
