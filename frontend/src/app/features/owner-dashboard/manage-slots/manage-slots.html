@@ -168,15 +168,16 @@
                   {{ slot.status === 'available' ? 'Libre' : slot.status === 'reserved' ? 'Réservé' : slot.status === 'blocked' ? 'Bloqué' : 'En attente' }}
                 </span>
   
-                <div>
-                  <div class="flex items-center gap-1.5 mb-0.5 mt-2">
+                <div class="mt-2 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="font-bold text-gray-800 text-sm">{{ slot.start_time.substring(0,5) }}</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="font-bold text-gray-800 text-sm">{{ slot.start_time.substring(0,5) }}</span>
+                      <span class="text-xs text-gray-400 font-medium px-1">-</span>
+                      <span class="font-bold text-gray-800 text-sm">{{ slot.end_time.substring(0,5) }}</span>
+                    </div>
                   </div>
-                  <span class="text-xs text-gray-400 block ml-5">→ {{ slot.end_time.substring(0,5) }}</span>
-                </div>
   
                 <div class="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button *ngIf="slot.status === 'available'" (click)="openManualReserve(slot)" title="Réserver (Téléphone)"
@@ -198,8 +199,9 @@
                   </button>
 
                   <button *ngIf="slot.status === 'available' || slot.status === 'blocked'" (click)="deleteSlot(slot.id)" title="Supprimer"
-                    class="flex-none flex justify-center items-center text-red-600 font-medium p-1.5 rounded-lg bg-red-100 hover:bg-red-200 transition-colors">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    class="flex-1 flex justify-center items-center gap-1 text-[11px] font-bold py-1.5 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 transition-colors">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    Supprimer
                   </button>
                 </div>
                 
