@@ -30,7 +30,15 @@ export class AdminService {
     return this.http.patch(`${this.apiUrl}/owners/${id}/toggle-status`, {});
   }
 
-  deleteOwner(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/owners/${id}`);
+  deleteOwner(ownerId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/owners/${ownerId}`);
+  }
+
+  getDetailedStats(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/detailed-stats`);
+  }
+
+  getBilling(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/billing`);
   }
 }

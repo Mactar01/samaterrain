@@ -78,7 +78,7 @@ export class DashboardComponent implements OnInit {
         }
         Swal.fire({
           icon: 'success',
-          title: 'SuccÃ¨s',
+          title: 'Succès',
           text: res.message,
           timer: 2000,
           showConfirmButton: false
@@ -105,7 +105,7 @@ export class DashboardComponent implements OnInit {
             <input id="swal-email" type="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-black focus:border-black" placeholder="jean@example.com">
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700">TÃ©lÃ©phone</label>
+            <label class="block text-sm font-medium text-gray-700">Téléphone</label>
             <input id="swal-phone" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-black focus:border-black" placeholder="77 123 45 67">
           </div>
           <div>
@@ -119,7 +119,7 @@ export class DashboardComponent implements OnInit {
         </div>
       `,
       showCancelButton: true,
-      confirmButtonText: 'CrÃ©er',
+      confirmButtonText: 'Créer',
       cancelButtonText: 'Annuler',
       confirmButtonColor: '#000000',
       cancelButtonColor: '#6b7280',
@@ -140,13 +140,21 @@ export class DashboardComponent implements OnInit {
       if (result.isConfirmed) {
         this.adminService.createOwner(result.value).subscribe({
           next: (res) => {
-            Swal.fire({ icon: 'success', title: 'SuccÃ¨s', text: 'Le compte a Ã©tÃ© crÃ©Ã©.', timer: 2000, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'Succès', text: 'Le compte a été créé.', timer: 2000, showConfirmButton: false });
             this.loadOwners();
             this.loadStats();
           },
           error: (err) => {
-            const errorMsg = err.error?.message || 'Erreur lors de la crÃ©ation.';
-            Swal.fire('Erreur', errorMsg, 'error');
+            let errorMsg = err.error?.message || 'Erreur lors de la création.';
+            if (err.error?.errors) {
+              const errors = Object.values(err.error.errors).flat();
+              errorMsg = errors.join('<br>');
+            }
+            Swal.fire({
+              title: 'Erreur',
+              html: errorMsg,
+              icon: 'error'
+            });
           }
         });
       }
@@ -155,8 +163,8 @@ export class DashboardComponent implements OnInit {
 
   deleteOwner(ownerId: number) {
     Swal.fire({
-      title: 'ÃŠtes-vous sÃ»r ?',
-      text: "La suppression d'un loueur est dÃ©finitive et supprimera ses terrains.",
+      title: 'Êtes-vous sûr ?',
+      text: "La suppression d'un loueur est définitive et supprimera ses terrains.",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#dc2626',
@@ -167,7 +175,7 @@ export class DashboardComponent implements OnInit {
       if (result.isConfirmed) {
         this.adminService.deleteOwner(ownerId).subscribe({
           next: () => {
-            Swal.fire('SupprimÃ©!', 'Le loueur a Ã©tÃ© supprimÃ©.', 'success');
+            Swal.fire('Supprimé!', 'Le loueur a été supprimé.', 'success');
             this.owners = this.owners.filter(o => o.id !== ownerId);
             this.loadStats();
             this.cdr.detectChanges();

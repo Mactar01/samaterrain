@@ -12,7 +12,7 @@
         <div class="flex items-center space-x-4">
           <span class="text-sm text-neutral-300">Bienvenue, {{ adminName }}</span>
           <button (click)="logout()" class="px-4 py-2 border border-white rounded-md text-sm font-medium hover:bg-white hover:text-black transition-colors duration-200">
-            DÃ©connexion
+            Déconnexion
           </button>
         </div>
       </div>
@@ -72,7 +72,7 @@
             <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
           </div>
           <div class="ml-5 w-0 flex-1">
-            <dt class="text-xs font-medium text-neutral-500 uppercase tracking-wide truncate">RÃ©servations</dt>
+            <dt class="text-xs font-medium text-neutral-500 uppercase tracking-wide truncate">Réservations</dt>
             <dd class="text-3xl font-bold text-black">{{ stats.total_reservations }}</dd>
           </div>
         </div>
@@ -84,7 +84,7 @@
       <div class="px-6 py-5 border-b border-neutral-200 bg-neutral-50 rounded-t-lg flex justify-between items-center">
         <div>
           <h3 class="text-lg leading-6 font-bold text-black">Gestion des partenaires (Loueurs)</h3>
-          <p class="mt-1 text-sm text-neutral-500">Ajoutez, modifiez ou bloquez l'accÃ¨s aux gÃ©rants de terrains.</p>
+          <p class="mt-1 text-sm text-neutral-500">Ajoutez, modifiez ou bloquez l'accès aux gérants de terrains.</p>
         </div>
         <button (click)="openCreateOwnerModal()" class="bg-black text-white px-4 py-2 rounded shadow text-sm hover:bg-neutral-800 transition">
           + Ajouter un loueur
@@ -97,7 +97,7 @@
       </div>
 
       <div *ngIf="!loadingOwners && owners.length === 0" class="p-10 text-center text-neutral-500">
-        Aucun partenaire trouvÃ©. CrÃ©ez-en un pour commencer !
+        Aucun partenaire trouvé. Créez-en un pour commencer !
       </div>
 
       <div *ngIf="!loadingOwners && owners.length > 0" class="overflow-x-auto">
@@ -118,19 +118,19 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-neutral-900">{{ owner.user?.email }}</div>
-                <div class="text-sm text-neutral-500">{{ owner.user?.phone || 'Non renseignÃ©' }}</div>
+                <div class="text-sm text-neutral-500">{{ owner.user?.phone || 'Non renseigné' }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span *ngIf="owner.user?.is_active" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                   Actif
                 </span>
                 <span *ngIf="!owner.user?.is_active" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                  BloquÃ©
+                  Bloqué
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button (click)="toggleOwnerStatus(owner)" class="text-black hover:text-neutral-600 mr-4 font-semibold">
-                  {{ owner.user?.is_active ? 'Bloquer' : 'DÃ©bloquer' }}
+                  {{ owner.user?.is_active ? 'Bloquer' : 'Débloquer' }}
                 </button>
                 <button (click)="deleteOwner(owner.id)" class="text-red-600 hover:text-red-900 font-semibold">
                   Supprimer

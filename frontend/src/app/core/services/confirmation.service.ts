@@ -36,7 +36,7 @@ export class ConfirmationService {
     return result.isConfirmed;
   }
 
-  success(message: string, title: string = 'SuccÃ¨s'): Promise<any> {
+  success(message: string, title: string = 'Succès'): Promise<any> {
     return Swal.fire({
       title: `<h2 class="text-2xl font-bold text-gray-800">${title}</h2>`,
       html: `<p class="text-lg text-gray-600 mt-2">${message}</p>`,

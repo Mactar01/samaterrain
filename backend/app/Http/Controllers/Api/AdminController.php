@@ -47,6 +47,15 @@ class AdminController extends Controller
             'phone'                 => ['nullable', 'string', 'max:20'],
             'password'              => ['required', 'confirmed', Password::min(8)],
             'business_name'         => ['required', 'string', 'max:200']
+        ], [
+            'name.required' => 'Le nom est obligatoire.',
+            'email.required' => 'L\'adresse email est obligatoire.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'business_name.required' => 'Le nom du complexe est obligatoire.'
         ]);
 
         $user = User::create([
@@ -132,6 +141,59 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Partenaire supprimé avec succès.'
+        ]);
+    }
+
+    public function getDetailedStats(): JsonResponse
+    {
+        $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
+        
+        $reservationsByStatus = \App\Models\Reservation::select('status', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->get();
+
+        if ($driver === 'sqlite') {
+            $monthlyRevenue = \App\Models\Reservation::where('status', 'completed')
+                ->selectRaw("strftime('%Y-%m', created_at) as month, SUM(total_price) as revenue")
+                ->groupBy('month')
+                ->orderBy('month', 'desc')
+                ->limit(6)
+                ->get();
+        } else {
+            $monthlyRevenue = \App\Models\Reservation::where('status', 'completed')
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_price) as revenue")
+                ->groupBy('month')
+                ->orderBy('month', 'desc')
+                ->limit(6)
+                ->get();
+        }
+
+        return response()->json([
+            'reservations_by_status' => $reservationsByStatus,
+            'monthly_revenue' => $monthlyRevenue
+        ]);
+    }
+
+    public function getBilling(): JsonResponse
+    {
+        $globalRevenue = \App\Models\Reservation::whereIn('status', ['confirmed', 'completed'])->sum('total_price');
+        $totalCommission = \App\Models\Reservation::whereIn('status', ['confirmed', 'completed'])->sum('commission');
+        
+        $pendingPayouts = $globalRevenue - $totalCommission;
+
+        $recentTransactions = [];
+        if (class_exists(\App\Models\Payment::class)) {
+            $recentTransactions = \App\Models\Payment::with(['reservation.user', 'reservation.field.owner'])
+                ->orderBy('created_at', 'desc')
+                ->take(10)
+                ->get();
+        }
+
+        return response()->json([
+            'global_revenue' => (float) $globalRevenue,
+            'total_commission' => (float) $totalCommission,
+            'pending_payouts' => (float) $pendingPayouts,
+            'recent_transactions' => $recentTransactions
         ]);
     }
 }
