@@ -249,16 +249,46 @@ export class ManageSlotsComponent implements OnInit {
   }
 
   toggleSlotStatus(slot: any) {
-    if (slot.status === 'reserved') return; // Cannot block reserved slots
+    if (slot.status === 'reserved') return;
     
-    const newStatus = slot.status === 'available' ? 'blocked' : 'available';
-    this.fieldService.updateSlot(this.fieldId, slot.id, { status: newStatus }).subscribe({
+    // Si on veut débloquer, on le fait directement sans modal
+    if (slot.status === 'blocked') {
+      this.fieldService.updateSlot(this.fieldId, slot.id, { status: 'available' }).subscribe({
+        next: () => {
+          slot.status = 'available';
+          slot.block_reason = null;
+          this.confirmationService.toast('Créneau débloqué', 'success');
+        },
+        error: () => this.confirmationService.error("Erreur lors de la modification du statut.")
+      });
+    }
+  }
+
+  openBlockModal(slot: any) {
+    this.selectedSlotToBlock = slot;
+    this.blockReason = 'Rénovation / Travaux';
+    this.blockCustomReason = '';
+    this.showBlockModal = true;
+  }
+
+  confirmBlock() {
+    this.isBlocking = true;
+    const finalReason = this.blockReason === 'Autre' ? this.blockCustomReason : this.blockReason;
+    
+    this.fieldService.updateSlot(this.fieldId, this.selectedSlotToBlock.id, { 
+      status: 'blocked',
+      block_reason: finalReason
+    }).subscribe({
       next: () => {
-        slot.status = newStatus;
-        this.confirmationService.toast(`Créneau ${newStatus === 'blocked' ? 'bloqué' : 'débloqué'}`, 'success');
+        this.selectedSlotToBlock.status = 'blocked';
+        this.selectedSlotToBlock.block_reason = finalReason;
+        this.isBlocking = false;
+        this.showBlockModal = false;
+        this.confirmationService.toast('Créneau bloqué avec succès', 'success');
       },
       error: () => {
-        this.confirmationService.error("Erreur lors de la modification du statut.");
+        this.isBlocking = false;
+        this.confirmationService.error("Erreur lors du blocage.");
       }
     });
   }
