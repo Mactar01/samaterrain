@@ -13,7 +13,8 @@ class DioClient {
   DioClient._internal() {
     // URL locale pour les tests sur réseau WiFi partagé
     // Le téléphone et le PC doivent être sur le même WiFi
-    String baseUrl = 'http://192.168.7.140:8000/api/v1';
+    // const String baseUrl = 'http://192.168.7.140:8000/api/v1'; // Local
+    const String baseUrl = 'https://myterrain-api-test.loca.lt/api/v1'; // Tunnel public (Collaborateur distant)
 
     dio = Dio(BaseOptions(
       baseUrl: baseUrl,
