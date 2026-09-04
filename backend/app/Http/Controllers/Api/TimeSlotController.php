@@ -84,4 +84,76 @@ class TimeSlotController extends Controller
 
         return response()->json(['message' => 'Créneau supprimé avec succès.']);
     }
+
+    public function update(Request $request, $fieldId, $slotId)
+    {
+        $field = Field::findOrFail($fieldId);
+        $this->authorize('update', $field);
+        
+        $slot = $field->timeSlots()->findOrFail($slotId);
+        
+        $data = $request->validate([
+            'status' => 'sometimes|in:available,blocked',
+            'price' => 'nullable|numeric|min:0'
+        ]);
+
+        if ($slot->status === 'reserved' && isset($data['status']) && $data['status'] === 'blocked') {
+            return response()->json(['message' => 'Impossible de bloquer un créneau déjà réservé.'], 403);
+        }
+
+        $slot->update($data);
+        return response()->json(['message' => 'Créneau mis à jour.', 'slot' => $slot]);
+    }
+
+    public function bulkCreate(Request $request, $fieldId)
+    {
+        $field = Field::findOrFail($fieldId);
+        $this->authorize('update', $field);
+
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'duration_minutes' => 'required|integer|min:30',
+            'price' => 'nullable|numeric|min:0'
+        ]);
+
+        $startDate = \Carbon\Carbon::parse($request->start_date);
+        $endDate = \Carbon\Carbon::parse($request->end_date);
+        $duration = $request->duration_minutes;
+        
+        $created = 0;
+
+        for ($date = clone $startDate; $date->lte($endDate); $date->addDay()) {
+            $startTime = \Carbon\Carbon::parse($date->format('Y-m-d') . ' ' . $request->start_time);
+            $endTime = \Carbon\Carbon::parse($date->format('Y-m-d') . ' ' . $request->end_time);
+
+            while ($startTime->copy()->addMinutes($duration)->lte($endTime)) {
+                $slotEnd = $startTime->copy()->addMinutes($duration);
+
+                $exists = $field->timeSlots()
+                    ->where('date', $date->format('Y-m-d'))
+                    ->where('start_time', $startTime->format('H:i:00'))
+                    ->exists();
+
+                if (!$exists) {
+                    $field->timeSlots()->create([
+                        'date' => $date->format('Y-m-d'),
+                        'start_time' => $startTime->format('H:i:s'),
+                        'end_time' => $slotEnd->format('H:i:s'),
+                        'price' => $request->price,
+                        'status' => 'available'
+                    ]);
+                    $created++;
+                }
+                
+                $startTime->addMinutes($duration);
+            }
+        }
+
+        return response()->json([
+            'message' => "$created créneaux générés avec succès."
+        ], 201);
+    }
 }

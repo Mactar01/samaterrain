@@ -149,37 +149,51 @@
           </div>
 
           <div *ngIf="slots.length > 0 && !isLoading" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div *ngFor="let slot of slots"
-              class="relative group rounded-xl border-2 p-3 transition-all"
-              [ngClass]="{
-                'border-green-200 bg-green-50 hover:border-green-400': slot.status === 'available',
-                'border-red-200 bg-red-50': slot.status === 'reserved',
-                'border-yellow-200 bg-yellow-50': slot.status === 'pending'
-              }">
-
-              <span class="absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+              <div *ngFor="let slot of slots"
+                class="relative group rounded-xl border-2 p-3 transition-all flex flex-col justify-between"
                 [ngClass]="{
-                  'bg-green-100 text-green-700': slot.status === 'available',
-                  'bg-red-100 text-red-700': slot.status === 'reserved',
-                  'bg-yellow-100 text-yellow-700': slot.status === 'pending'
+                  'border-green-200 bg-green-50 hover:border-green-400': slot.status === 'available',
+                  'border-red-200 bg-red-50': slot.status === 'reserved',
+                  'border-yellow-200 bg-yellow-50': slot.status === 'pending',
+                  'border-gray-200 bg-gray-50': slot.status === 'blocked'
                 }">
-                {{ slot.status === 'available' ? 'Libre' : slot.status === 'reserved' ? 'Réservé' : 'En attente' }}
-              </span>
+  
+                <span class="absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                  [ngClass]="{
+                    'bg-green-100 text-green-700': slot.status === 'available',
+                    'bg-red-100 text-red-700': slot.status === 'reserved',
+                    'bg-yellow-100 text-yellow-700': slot.status === 'pending',
+                    'bg-gray-200 text-gray-700': slot.status === 'blocked'
+                  }">
+                  {{ slot.status === 'available' ? 'Libre' : slot.status === 'reserved' ? 'Réservé' : slot.status === 'blocked' ? 'Bloqué' : 'En attente' }}
+                </span>
+  
+                <div>
+                  <div class="flex items-center gap-1.5 mb-0.5 mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="font-bold text-gray-800 text-sm">{{ slot.start_time.substring(0,5) }}</span>
+                  </div>
+                  <span class="text-xs text-gray-400 block ml-5">→ {{ slot.end_time.substring(0,5) }}</span>
+                </div>
+  
+                <div class="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button *ngIf="slot.status === 'available' || slot.status === 'blocked'" (click)="toggleSlotStatus(slot)" 
+                    [title]="slot.status === 'available' ? 'Bloquer ce créneau' : 'Débloquer'"
+                    class="flex-1 flex justify-center text-xs font-medium py-1.5 rounded-lg transition-colors"
+                    [ngClass]="slot.status === 'available' ? 'text-orange-600 bg-orange-100 hover:bg-orange-200' : 'text-green-600 bg-green-100 hover:bg-green-200'">
+                    {{ slot.status === 'available' ? 'Bloquer' : 'Débloquer' }}
+                  </button>
 
-              <div class="flex items-center gap-1.5 mb-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="font-bold text-gray-800 text-sm">{{ slot.start_time.substring(0,5) }}</span>
+                  <button *ngIf="slot.status === 'available' || slot.status === 'blocked'" (click)="deleteSlot(slot.id)" title="Supprimer"
+                    class="text-xs text-red-600 font-medium p-1.5 rounded-lg bg-red-100 hover:bg-red-200 transition-colors flex items-center justify-center">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+                
+                <p *ngIf="slot.status === 'reserved'" class="mt-2 text-[10px] text-gray-400 text-center">Non modifiable</p>
               </div>
-              <span class="text-xs text-gray-400 block ml-5">→ {{ slot.end_time.substring(0,5) }}</span>
-
-              <button *ngIf="slot.status === 'available'" (click)="deleteSlot(slot.id)" title="Supprimer"
-                  class="mt-2 w-full text-xs text-red-500 font-medium py-1 rounded-lg hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100 flex justify-center">
-                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                </button>
-              <p *ngIf="slot.status !== 'available'" class="mt-2 text-[10px] text-gray-400 text-center">Non modifiable</p>
-            </div>
           </div>
         </div>
       </div>

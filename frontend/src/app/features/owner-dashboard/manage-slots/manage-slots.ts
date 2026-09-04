@@ -200,43 +200,26 @@ export class ManageSlotsComponent implements OnInit {
 
   generateBulk() {
     this.isBulkGenerating = true;
-    const start = new Date(this.bulk.startDate);
-    const end = new Date(this.bulk.endDate);
-    const requests: any[] = [];
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
-      const [oh, om] = this.bulk.openTime.split(':').map(Number);
-      const [ch, cm] = this.bulk.closeTime.split(':').map(Number);
-      let cursor = oh * 60 + om;
-      const closeMin = ch * 60 + cm;
+    const payload = {
+      start_date: this.bulk.startDate,
+      end_date: this.bulk.endDate,
+      start_time: this.bulk.openTime,
+      end_time: this.bulk.closeTime,
+      duration_minutes: this.bulk.durationMinutes
+    };
 
-      while (cursor + this.bulk.durationMinutes <= closeMin) {
-        const sh = Math.floor(cursor / 60);
-        const sm = cursor % 60;
-        cursor += Number(this.bulk.durationMinutes);
-        const eh = Math.floor(cursor / 60);
-        const em = cursor % 60;
-
-        requests.push(this.fieldService.createSlot(this.fieldId, {
-          date: dateStr,
-          start_time: `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`,
-          end_time: `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`,
-          is_recurring: false
-        }));
-      }
-    }
-
-    forkJoin(requests).subscribe({
-      next: () => {
+    this.fieldService.bulkCreateSlots(this.fieldId, payload).subscribe({
+      next: (res) => {
         this.isBulkGenerating = false;
         this.showBulkModal = false;
+        this.confirmationService.toast(res.message || "Créneaux générés avec succès", "success");
         this.loadSlots();
         this.preloadWeek();
       },
-      error: () => {
+      error: (err) => {
         this.isBulkGenerating = false;
-        alert("Erreur lors de la génération. Certains créneaux existent peut-être déjà.");
+        this.confirmationService.error(err.error?.message || "Erreur lors de la génération en masse.");
         this.loadSlots();
       }
     });
@@ -248,5 +231,19 @@ export class ManageSlotsComponent implements OnInit {
     const months = ['jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
     return `${d} ${months[parseInt(m)-1]} ${y}`;
   }
-}
 
+  toggleSlotStatus(slot: any) {
+    if (slot.status === 'reserved') return; // Cannot block reserved slots
+    
+    const newStatus = slot.status === 'available' ? 'blocked' : 'available';
+    this.fieldService.updateSlot(this.fieldId, slot.id, { status: newStatus }).subscribe({
+      next: () => {
+        slot.status = newStatus;
+        this.confirmationService.toast(`Créneau ${newStatus === 'blocked' ? 'bloqué' : 'débloqué'}`, 'success');
+      },
+      error: () => {
+        this.confirmationService.error("Erreur lors de la modification du statut.");
+      }
+    });
+  }
+}

@@ -14,74 +14,141 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ————————————————————————————————————————————————————————————————————————————————————————————————————
     // POST /api/v1/auth/register
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ————————————————————————————————————————————————————————————————————————————————————————————————————
     public function register(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name'                  => ['required', 'string', 'max:100'],
-            'email'                 => ['required', 'email', 'max:150', 'unique:users'],
-            'phone'                 => ['nullable', 'string', 'max:20'],
+            'phone'                 => ['required', 'string', 'max:20', 'unique:users'],
             'password'              => ['required', 'confirmed', Password::min(8)],
-            // 'role' est dÃ©sormais forcÃ© Ã  'player' cÃ´tÃ© serveur
         ]);
+
+        $otp = rand(1000, 9999);
 
         $user = User::create([
-            'name'      => $data['name'],
-            'email'     => $data['email'],
-            'phone'     => $data['phone'] ?? null,
-            'password'  => Hash::make($data['password']),
-            'role'      => 'player', // <- ForcÃ© Ã  'player'
-            'is_active' => true,
+            'name'           => $data['name'],
+            'phone'          => $data['phone'],
+            'password'       => Hash::make($data['password']),
+            'role'           => 'player',
+            'is_active'      => false, // Require OTP validation
+            'otp_code'       => $otp,
+            'otp_expires_at' => now()->addMinutes(10),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Simuler l'envoi du SMS en l'affichant dans le log/terminal du serveur
+        \Log::info("=== SIMULATION SMS ===");
+        \Log::info("Numéro : {$user->phone}");
+        \Log::info("Code OTP : {$otp}");
+        \Log::info("======================");
 
         return response()->json([
-            'message' => 'Compte crÃ©Ã© avec succÃ¨s.',
-            'user'    => $this->userResource($user),
-            'token'   => $token,
+            'message' => 'Compte créé avec succès. Un code OTP a été envoyé par SMS.',
+            'phone'   => $user->phone
         ], 201);
     }
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // POST /api/v1/auth/login
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'email'    => ['required', 'email'],
+            'phone'    => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $data['email'])->first();
+        $user = User::where('phone', $data['phone'])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Les identifiants sont incorrects.'],
+                'phone' => ['Les identifiants sont incorrects.'],
             ]);
         }
 
         if (! $user->is_active) {
-            return response()->json([
-                'message' => 'Votre compte a Ã©tÃ© dÃ©sactivÃ©. Contactez le support.',
-            ], 403);
+            throw ValidationException::withMessages([
+                'phone' => ['Votre compte n\'est pas encore activé. Veuillez vérifier votre numéro avec le code OTP.'],
+            ]);
         }
 
-        // RÃ©voquer les anciens tokens et crÃ©er un nouveau
-        $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Connexion rÃ©ussie.',
+            'message' => 'Connexion réussie',
             'user'    => $this->userResource($user),
             'token'   => $token,
         ]);
     }
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'phone'    => ['required', 'string'],
+            'otp_code' => ['required', 'string'],
+        ]);
+
+        $user = User::where('phone', $data['phone'])->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur introuvable.'], 404);
+        }
+
+        if ($user->otp_code !== $data['otp_code']) {
+            return response()->json(['message' => 'Code OTP incorrect.'], 400);
+        }
+
+        if ($user->otp_expires_at && now()->greaterThan($user->otp_expires_at)) {
+            return response()->json(['message' => 'Ce code OTP a expiré.'], 400);
+        }
+
+        // Code valide, on active le compte
+        $user->is_active = true;
+        $user->otp_code = null;
+        $user->otp_expires_at = null;
+        $user->save();
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Numéro de téléphone vérifié avec succès.',
+            'user'    => $this->userResource($user),
+            'token'   => $token,
+        ]);
+    }
+
+    public function resendOtp(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'phone' => ['required', 'string'],
+        ]);
+
+        $user = User::where('phone', $data['phone'])->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur introuvable.'], 404);
+        }
+
+        if ($user->is_active) {
+            return response()->json(['message' => 'Ce compte est déjà activé.'], 400);
+        }
+
+        $otp = rand(1000, 9999);
+        $user->otp_code = $otp;
+        $user->otp_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        \Log::info("=== SIMULATION SMS (Renvoyé) ===");
+        \Log::info("Numéro : {$user->phone}");
+        \Log::info("Code OTP : {$otp}");
+        \Log::info("======================");
+
+        return response()->json([
+            'message' => 'Un nouveau code OTP a été envoyé par SMS.',
+        ]);
+    }
+
+    // ————————————————————————————————————————————————————————————————————————————————————————————————————
     // POST /api/v1/auth/logout
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ————————————————————————————————————————————————————————————————————————————————————————————————————
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();

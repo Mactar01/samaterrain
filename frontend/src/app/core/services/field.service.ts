@@ -29,7 +29,7 @@ export class FieldService {
     return this.http.delete(`${this.apiUrl}/fields/${fieldId}/slots/${slotId}`);
   }
 
-    updateField(fieldId: number, fieldData: any): Observable<any> {
+  updateField(fieldId: number, fieldData: any): Observable<any> {
     if (fieldData.photo) {
       const formData = new FormData();
       formData.append('_method', 'PUT');
@@ -41,5 +41,13 @@ export class FieldService {
       return this.http.post(`${this.apiUrl}/fields/${fieldId}`, formData);
     }
     return this.http.put(`${this.apiUrl}/fields/${fieldId}`, fieldData);
+  }
+
+  updateSlot(fieldId: number, slotId: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/fields/${fieldId}/slots/${slotId}`, data);
+  }
+
+  bulkCreateSlots(fieldId: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/fields/${fieldId}/slots/bulk`, data);
   }
 }
