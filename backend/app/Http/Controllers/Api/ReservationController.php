@@ -34,17 +34,76 @@ class ReservationController extends Controller
      */
     public function ownerIndex(Request $request)
     {
-        $owner = Owner::where('user_id', $request->user()->id)->first();
+        $owner = \App\Models\Owner::where('user_id', $request->user()->id)->first();
         if (!$owner) return response()->json([]);
-
-        $reservations = Reservation::whereHas('field', function($q) use ($owner) {
-                $q->where('owner_id', $owner->id);
+        
+        $reservations = Reservation::with(['user', 'field', 'timeSlot'])
+            ->whereHas('field', function ($query) use ($owner) {
+                $query->where('owner_id', $owner->id);
             })
-            ->with(['user', 'field', 'timeSlot', 'payment'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         return response()->json($reservations);
+    }
+
+    /**
+     * Création manuelle d'une réservation par le gérant (ex: réservation par téléphone)
+     */
+    public function storeManual(Request $request)
+    {
+        $data = $request->validate([
+            'time_slot_id' => 'required|exists:time_slots,id',
+            'player_name'  => 'required|string|max:100',
+            'player_phone' => 'required|string|max:20',
+        ]);
+
+        $owner = \App\Models\Owner::where('user_id', $request->user()->id)->firstOrFail();
+
+        // Vérifier que le créneau appartient bien au gérant connecté
+        $slot = TimeSlot::with('field')->findOrFail($data['time_slot_id']);
+        if ($slot->field->owner_id !== $owner->id) {
+            abort(403, 'Non autorisé à modifier ce terrain.');
+        }
+
+        if (!$slot->isAvailable()) {
+            abort(409, 'Ce créneau n\'est pas disponible.');
+        }
+
+        // Trouver ou créer l'utilisateur "joueur" via son téléphone
+        $player = User::firstOrCreate(
+            ['phone' => $data['player_phone']],
+            [
+                'name'      => $data['player_name'],
+                'password'  => Hash::make(\Illuminate\Support\Str::random(16)),
+                'role'      => 'player',
+                'is_active' => true,
+            ]
+        );
+
+        $price = $slot->effectivePrice();
+        $commission = $price * ($owner->commission_rate / 100);
+
+        DB::transaction(function () use ($slot, $player, $price, $commission) {
+            // Créer la réservation directement en statut confirmé
+            Reservation::create([
+                'user_id'      => $player->id,
+                'field_id'     => $slot->field_id,
+                'time_slot_id' => $slot->id,
+                'status'       => 'confirmed',
+                'total_price'  => $price,
+                'commission'   => $commission,
+                'notes'        => 'Réservation manuelle par le gérant (Téléphone)',
+            ]);
+
+            // Mettre à jour le statut du créneau
+            $slot->status = 'reserved';
+            $slot->save();
+        });
+
+        return response()->json([
+            'message' => 'Réservation manuelle ajoutée avec succès.',
+        ], 201);
     }
 
     /**

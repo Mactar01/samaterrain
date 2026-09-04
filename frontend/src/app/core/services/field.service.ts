@@ -50,4 +50,8 @@ export class FieldService {
   bulkCreateSlots(fieldId: number, data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/fields/${fieldId}/slots/bulk`, data);
   }
+
+  createManualReservation(data: { time_slot_id: number, player_name: string, player_phone: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/owner/reservations/manual`, data);
+  }
 }
