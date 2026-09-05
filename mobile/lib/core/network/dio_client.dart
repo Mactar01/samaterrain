@@ -11,10 +11,11 @@ class DioClient {
   }
 
   DioClient._internal() {
-    // URL locale pour les tests sur réseau WiFi partagé
-    // Le téléphone et le PC doivent être sur le même WiFi
-    // const String baseUrl = 'http://192.168.7.140:8000/api/v1'; // Local
-    const String baseUrl = 'https://hdtv-explorer-stored-serial.trycloudflare.com/api/v1'; // Cloudflare Tunnel (Très stable)
+    // Web (Chrome / mobile_web) → backend local
+    // APK natif → backend Render (production)
+    final String baseUrl = kIsWeb
+        ? 'http://localhost:8000/api/v1'                      // Chrome dev
+        : 'https://samaterrain-api.onrender.com/api/v1';     // APK natif → prod
 
     dio = Dio(BaseOptions(
       baseUrl: baseUrl,

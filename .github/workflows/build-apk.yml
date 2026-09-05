@@ -1,27 +1,79 @@
-name: Build Android APK
+name: 📱 Build Android APK
+
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [main]
+    tags: ['v*']          # ex: v1.0.1 → crée une Release GitHub
+  workflow_dispatch:      # Lancement manuel depuis GitHub
 
 jobs:
-  build:
-    name: Build APK
+  build-apk:
+    name: 🔨 Build APK
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      # ── 1. Checkout ─────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. Java (requis pour Gradle) ────────────────────────────
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-      - uses: subosito/flutter-action@v2
+
+      # ── 3. Flutter (même version que locale : 3.47.2) ───────────
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.2'
           channel: 'stable'
-      - run: cd mobile && flutter pub get
-      - run: cd mobile && flutter build apk --release
-      - name: Upload APK
+          cache: true
+
+      # ── 4. Dépendances ──────────────────────────────────────────
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      # ── 5. Build APK release ────────────────────────────────────
+      - name: Build APK
+        working-directory: mobile
+        run: flutter build apk --release
+
+      # ── 6. Renommer avec version + date ─────────────────────────
+      - name: Rename APK
+        run: |
+          VERSION=$(grep 'version:' mobile/pubspec.yaml | head -1 | awk '{print $2}')
+          DATE=$(date +%Y%m%d)
+          cp mobile/build/app/outputs/flutter-apk/app-release.apk \
+             "myTerrain-v${VERSION}-${DATE}.apk"
+          echo "APK_NAME=myTerrain-v${VERSION}-${DATE}.apk" >> $GITHUB_ENV
+
+      # ── 7. Upload artifact (onglet Actions, 30 jours) ───────────
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: myTerrain-app-release
-          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          name: ${{ env.APK_NAME }}
+          path: ${{ env.APK_NAME }}
+          retention-days: 30
+
+      # ── 8. Release GitHub (seulement sur tag v*) ────────────────
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.APK_NAME }}
+          generate_release_notes: true
+          name: "myTerrain ${{ github.ref_name }}"
+          body: |
+            ## 📱 myTerrain APK
+
+            ### Installation
+            1. Téléchargez l'APK ci-dessous
+            2. **Paramètres → Sécurité → Sources inconnues** (activer)
+            3. Ouvrez le fichier APK et installez
+
+            ### Backend
+            - API : `https://samaterrain-api.onrender.com`
+

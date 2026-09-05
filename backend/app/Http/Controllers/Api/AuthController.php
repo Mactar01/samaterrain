@@ -21,6 +21,7 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name'                  => ['required', 'string', 'max:100'],
+            'email'                 => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
             'phone'                 => ['required', 'string', 'max:20', 'unique:users'],
             'password'              => ['required', 'confirmed', Password::min(8)],
         ]);
@@ -30,10 +31,11 @@ class AuthController extends Controller
 
         $user = User::create([
             'name'           => $data['name'],
+            'email'          => $data['email'] ?? null,
             'phone'          => $data['phone'],
             'password'       => Hash::make($data['password']),
             'role'           => 'player',
-            'is_active'      => true, // Remis à true pour ne pas bloquer le mobile
+            'is_active'      => true,
             // 'otp_code'       => $otp,
             // 'otp_expires_at' => now()->addMinutes(10),
         ]);
